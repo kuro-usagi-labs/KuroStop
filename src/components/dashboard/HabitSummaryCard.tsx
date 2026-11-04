@@ -1,10 +1,10 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../common/Card';
 import { Badge } from '../common/Badge';
 import { Button } from '../common/Button';
-import { ConsequenceZone, HabitSeverity } from '../../types';
+import { HabitSeverity } from '../../types';
 import { COLORS } from '../../theme/colors';
 import { SPACING, RADIUS } from '../../theme/spacing';
 import { formatIDR } from '../../utils/currency';
@@ -13,7 +13,6 @@ interface HabitSummaryCardProps {
   habit: 'smoking' | 'pmo' | 'sleep';
   severity: HabitSeverity;
   onPressCard: () => void;
-  // Specific properties
   smokingCount?: number;
   spendingToday?: number;
   onQuickAddSmoke?: () => void;
@@ -49,19 +48,19 @@ export const HabitSummaryCard: React.FC<HabitSummaryCardProps> = ({
         };
       case 'pmo':
         return {
-          title: 'PMO / Masturbasi',
-          icon: 'eye-off-outline' as const,
+          title: 'PMO & Masturbasi',
+          icon: 'shield-outline' as const,
           mainValue: `${pmoCount}`,
           mainUnit: 'sesi',
-          subtitle: pmoCount === 0 ? 'Pikiran bersih • Target 0' : 'Target dilanggar hari ini',
+          subtitle: pmoCount === 0 ? 'Pikiran bersih • Target 0 toleransi' : 'Target dilanggar hari ini',
         };
       case 'sleep':
         return {
           title: 'Tidur & Begadang',
           icon: 'moon-outline' as const,
-          mainValue: isSleeping ? 'Sedang Tidur' : targetBedtime,
+          mainValue: isSleeping ? 'Tidur Aktif' : targetBedtime,
           mainUnit: isSleeping ? '' : 'target',
-          subtitle: severity.summary,
+          subtitle: isSleeping ? 'Sedang mencatat jam tidur' : severity.summary,
         };
     }
   };
@@ -75,12 +74,13 @@ export const HabitSummaryCard: React.FC<HabitSummaryCardProps> = ({
         styles.card,
         severity.status === 'CRITICAL' && styles.criticalCard,
         severity.status === 'DANGER' && styles.dangerCard,
+        severity.status === 'WARNING' && styles.warningCard,
       ]}
     >
       <View style={styles.headerRow}>
         <View style={styles.titleWrapper}>
-          <View style={[styles.iconCircle, { backgroundColor: COLORS.surfaceSubtle }]}>
-            <Ionicons name={details.icon} size={18} color={COLORS.textPrimary} />
+          <View style={styles.iconCircle}>
+            <Ionicons name={details.icon} size={16} color={COLORS.textPrimary} />
           </View>
           <Text style={styles.titleText}>{details.title}</Text>
         </View>
@@ -96,7 +96,6 @@ export const HabitSummaryCard: React.FC<HabitSummaryCardProps> = ({
           <Text style={styles.subtitleText}>{details.subtitle}</Text>
         </View>
 
-        {/* Quick Action Button for this habit */}
         <View style={styles.actionWrapper}>
           {habit === 'smoking' && onQuickAddSmoke && (
             <Button
@@ -135,39 +134,51 @@ export const HabitSummaryCard: React.FC<HabitSummaryCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs + 2,
     backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  criticalCard: {
-    borderColor: COLORS.critical.border,
-    backgroundColor: COLORS.critical.surfaceSubtle,
+  warningCard: {
+    borderColor: COLORS.warning.border,
+    backgroundColor: COLORS.warning.surfaceSubtle,
   },
   dangerCard: {
     borderColor: COLORS.danger.border,
     backgroundColor: COLORS.danger.surfaceSubtle,
   },
+  criticalCard: {
+    borderColor: COLORS.critical.border,
+    backgroundColor: COLORS.critical.surfaceSubtle,
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   titleWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   iconCircle: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
     borderRadius: RADIUS.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
+    backgroundColor: COLORS.surfaceSubtle,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+    marginRight: 9,
   },
   titleText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
     color: COLORS.textPrimary,
+    letterSpacing: -0.2,
   },
   bodyRow: {
     flexDirection: 'row',
@@ -185,13 +196,13 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '800',
     color: COLORS.textPrimary,
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
   },
   unitText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: COLORS.textSecondary,
-    marginLeft: 6,
+    marginLeft: 5,
   },
   subtitleText: {
     fontSize: 12,
@@ -200,15 +211,15 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   actionWrapper: {
-    marginLeft: 12,
+    marginLeft: 10,
   },
   quickButton: {
-    minHeight: 38,
+    minHeight: 36,
     paddingHorizontal: 14,
     borderRadius: RADIUS.md,
   },
   quickButtonText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
 });

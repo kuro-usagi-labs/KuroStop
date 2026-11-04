@@ -3,46 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KuroStop — Interactive Design & Consequence Showcase</title>
+  <title>KuroStop — Apple Pro Interactive Design Showcase</title>
   <style>
     :root {
       --bg: #F8FAF9;
       --surface: #FFFFFF;
-      --surface-subtle: #F1F5F3;
-      --border: #E2EAE5;
-      --border-subtle: #EDF2EF;
-      --text-primary: #18211E;
-      --text-secondary: #66746E;
-      --text-tertiary: #9EABA4;
+      --surface-subtle: #F3F7F5;
+      --surface-active: #E8EFEA;
+      --border: #E2ECE6;
+      --border-subtle: #EDF3EF;
+      --text-primary: #121A17;
+      --text-secondary: #586660;
+      --text-tertiary: #92A199;
 
-      /* CLEAR */
-      --clear-primary: #3BB273;
-      --clear-accent: #54C98A;
-      --clear-surface: #DDF6E8;
-      --clear-border: #BFE7D0;
-      --clear-glow: rgba(84, 201, 138, 0.4);
+      /* CLEAR / FRESH STATE (Emerald Mint) */
+      --clear-primary: #2B9B5E;
+      --clear-accent: #48C07E;
+      --clear-deep: #16683C;
+      --clear-surface: #E8F7EE;
+      --clear-border: #BFE8D0;
+      --clear-glow: rgba(72, 192, 126, 0.35);
 
-      /* WARNING */
-      --warning-primary: #D9911C;
-      --warning-accent: #E9AA40;
-      --warning-surface: #FDF5E6;
-      --warning-border: #F6DAB0;
-      --warning-glow: rgba(233, 170, 64, 0.45);
+      /* WARNING STATE (Warm Amber) */
+      --warning-primary: #C5780D;
+      --warning-accent: #E59824;
+      --warning-deep: #7D4904;
+      --warning-surface: #FDF6E8;
+      --warning-border: #F5D9A5;
+      --warning-glow: rgba(229, 152, 36, 0.4);
 
-      /* DANGER */
-      --danger-primary: #D95325;
-      --danger-accent: #E76B40;
+      /* DANGER STATE (Fiery Coral) */
+      --danger-primary: #D04416;
+      --danger-accent: #E55E2B;
+      --danger-deep: #8E2704;
       --danger-surface: #FDF1EB;
-      --danger-border: #F9C8B5;
-      --danger-glow: rgba(231, 107, 64, 0.5);
+      --danger-border: #F9C6B0;
+      --danger-glow: rgba(229, 94, 43, 0.45);
 
-      /* CRITICAL */
-      --critical-primary: #C4283D;
-      --critical-accent: #D83D52;
-      --critical-deep: #922539;
+      /* CRITICAL STATE (Visceral Crimson) */
+      --critical-primary: #B71C31;
+      --critical-accent: #D62D44;
+      --critical-deep: #7F1423;
       --critical-surface: #FDEEF0;
-      --critical-border: #F5B8C0;
-      --critical-glow: rgba(216, 61, 82, 0.6);
+      --critical-border: #F6B6BD;
+      --critical-glow: rgba(214, 45, 68, 0.55);
     }
 
     * {
@@ -50,209 +54,265 @@
       margin: 0;
       padding: 0;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background: #0E1311;
-      color: #E0E7E3;
+      background: #090D0B;
+      color: #E2EAE5;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px 60px;
+      padding: 32px 16px 80px;
+      overflow-x: hidden;
     }
 
-    .top-header {
+    /* Top Showcase Bar */
+    .showcase-header {
       text-align: center;
-      max-width: 680px;
+      max-width: 720px;
       margin-bottom: 24px;
     }
 
-    .badge-tag {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 99px;
+    .eyebrow-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 999px;
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 1px;
-      background: rgba(84, 201, 138, 0.15);
-      color: #54C98A;
-      border: 1px solid rgba(84, 201, 138, 0.3);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      background: rgba(72, 192, 126, 0.12);
+      color: #48C07E;
+      border: 1px solid rgba(72, 192, 126, 0.28);
+      margin-bottom: 12px;
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #48C07E;
+    }
+
+    h1.brand-title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      color: #FFFFFF;
       margin-bottom: 8px;
     }
 
-    h1 {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: #FFFFFF;
-      margin-bottom: 6px;
-    }
-
-    .tagline {
+    p.brand-sub {
       font-size: 14px;
-      color: #8C9993;
-      margin-bottom: 16px;
+      line-height: 22px;
+      color: #8C9C94;
+      margin-bottom: 20px;
     }
 
-    /* Controller Panel */
-    .controls-panel {
-      background: #18211E;
-      border: 1px solid #2B3833;
-      border-radius: 16px;
-      padding: 12px 18px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
+    /* Zone Selector Toolbar */
+    .zone-toolbar {
+      display: inline-flex;
+      background: #151D19;
+      border: 1px solid #23302A;
+      border-radius: 18px;
+      padding: 6px;
+      gap: 6px;
       margin-bottom: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
 
-    .control-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: #8C9993;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .zone-buttons {
-      display: flex;
+    .zone-trigger {
+      display: inline-flex;
+      align-items: center;
       gap: 8px;
-    }
-
-    .zone-btn {
-      padding: 6px 14px;
-      border-radius: 8px;
+      padding: 8px 16px;
+      border-radius: 12px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
+      background: transparent;
+      color: #92A39B;
       border: 1px solid transparent;
-      transition: all 0.2s ease;
-      background: #232E2A;
-      color: #B5C4BC;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .zone-btn:hover {
-      filter: brightness(1.2);
+    .zone-trigger svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.2;
     }
 
-    .zone-btn.active[data-zone="CLEAR"] {
+    .zone-trigger:hover {
+      color: #FFFFFF;
+      background: #1D2823;
+    }
+
+    .zone-trigger.active[data-zone="CLEAR"] {
       background: var(--clear-surface);
-      color: var(--clear-primary);
+      color: var(--clear-deep);
       border-color: var(--clear-border);
     }
-    .zone-btn.active[data-zone="WARNING"] {
+    .zone-trigger.active[data-zone="WARNING"] {
       background: var(--warning-surface);
-      color: var(--warning-primary);
+      color: var(--warning-deep);
       border-color: var(--warning-border);
     }
-    .zone-btn.active[data-zone="DANGER"] {
+    .zone-trigger.active[data-zone="DANGER"] {
       background: var(--danger-surface);
-      color: var(--danger-primary);
+      color: var(--danger-deep);
       border-color: var(--danger-border);
     }
-    .zone-btn.active[data-zone="CRITICAL"] {
+    .zone-trigger.active[data-zone="CRITICAL"] {
       background: var(--critical-surface);
       color: var(--critical-deep);
       border-color: var(--critical-border);
     }
 
-    /* Device Container */
-    .device-stage {
+    /* Device Mockup Stage */
+    .device-viewport {
+      position: relative;
       display: flex;
       justify-content: center;
-      position: relative;
     }
 
-    .iphone-frame {
-      width: 380px;
-      height: 780px;
+    .iphone-pro {
+      width: 390px;
+      height: 810px;
       background: var(--bg);
-      border-radius: 52px;
-      box-shadow: 0 0 0 12px #222B27, 0 0 0 14px #33403B, 0 30px 80px rgba(0, 0, 0, 0.7);
+      border-radius: 54px;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 0 12px #1A211D,
+        0 0 0 14px #28332E,
+        0 35px 90px rgba(0, 0, 0, 0.85);
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      border: 2px solid transparent;
-      transition: border-color 0.5s ease;
+      border: 2.5px solid transparent;
+      transition: border-color 0.6s ease, box-shadow 0.6s ease;
     }
 
-    /* Dynamic atmosphere decay border */
-    .iphone-frame[data-zone="CLEAR"] {
-      border-color: rgba(84, 201, 138, 0.2);
+    /* Environmental atmospheric decay border */
+    .iphone-pro[data-zone="CLEAR"] {
+      border-color: rgba(72, 192, 126, 0.22);
     }
-    .iphone-frame[data-zone="WARNING"] {
+    .iphone-pro[data-zone="WARNING"] {
       border-color: var(--warning-border);
+      box-shadow: 0 0 0 12px #1A211D, 0 0 0 14px #28332E, 0 0 30px rgba(229, 152, 36, 0.2), 0 35px 90px rgba(0, 0, 0, 0.85);
     }
-    .iphone-frame[data-zone="DANGER"] {
+    .iphone-pro[data-zone="DANGER"] {
       border-color: var(--danger-border);
+      box-shadow: 0 0 0 12px #1A211D, 0 0 0 14px #28332E, 0 0 40px rgba(229, 94, 43, 0.3), 0 35px 90px rgba(0, 0, 0, 0.85);
     }
-    .iphone-frame[data-zone="CRITICAL"] {
+    .iphone-pro[data-zone="CRITICAL"] {
       border-color: var(--critical-accent);
-      box-shadow: 0 0 0 12px #222B27, 0 0 0 14px #33403B, 0 0 40px rgba(216, 61, 82, 0.35), 0 30px 80px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 0 0 12px #1A211D, 0 0 0 14px #28332E, 0 0 60px rgba(214, 45, 68, 0.45), 0 35px 90px rgba(0, 0, 0, 0.85);
+    }
+
+    /* Ambient screen vignette tint on danger/critical */
+    .vignette-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.6s ease, background 0.6s ease;
+    }
+    .iphone-pro[data-zone="WARNING"] .vignette-overlay {
+      opacity: 0.05;
+      background: var(--warning-accent);
+    }
+    .iphone-pro[data-zone="DANGER"] .vignette-overlay {
+      opacity: 0.12;
+      background: var(--danger-accent);
+    }
+    .iphone-pro[data-zone="CRITICAL"] .vignette-overlay {
+      opacity: 0.22;
+      background: var(--critical-deep);
     }
 
     /* Dynamic Island */
-    .notch-bar {
+    .dynamic-island {
       position: absolute;
       top: 11px;
       left: 50%;
       transform: translateX(-50%);
-      width: 120px;
-      height: 32px;
+      width: 122px;
+      height: 34px;
       background: #000000;
       border-radius: 20px;
       z-index: 100;
-    }
-
-    .status-bar {
-      height: 48px;
-      padding: 14px 28px 0;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-      z-index: 90;
+      padding: 0 12px;
+    }
+    .camera-lens {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #0D161B;
+      border: 1px solid #1A272E;
+    }
+    .sensor-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #0C1014;
     }
 
-    /* Phone Screen Content */
-    .screen-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px 18px 24px;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    .screen-body::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Header in app */
-    .app-topbar {
+    /* Status Bar */
+    .status-bar-ios {
+      height: 52px;
+      padding: 16px 28px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      padding-top: 4px;
-    }
-
-    .app-logo {
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing: 1.5px;
+      font-size: 13px;
+      font-weight: 700;
       color: var(--text-primary);
+      z-index: 90;
+    }
+    .status-icons {
       display: flex;
       align-items: center;
       gap: 6px;
     }
+    .status-icons svg {
+      width: 15px;
+      height: 15px;
+      fill: var(--text-primary);
+    }
 
-    .live-dot {
+    /* App Navigation Top Bar */
+    .app-nav-header {
+      padding: 4px 20px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 60;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .brand-wordmark {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--text-primary);
+    }
+
+    .pulse-status-beacon {
       width: 7px;
       height: 7px;
       border-radius: 50%;
@@ -260,38 +320,80 @@
       transition: background 0.4s ease;
     }
 
-    .top-nav-icons {
+    .header-actions {
       display: flex;
       gap: 12px;
     }
 
-    .nav-icon-btn {
-      background: none;
+    .header-icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: transparent;
       border: none;
-      font-size: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
+      color: var(--text-primary);
+      transition: background 0.2s;
+    }
+    .header-icon-btn:hover {
+      background: var(--surface-subtle);
+    }
+    .header-icon-btn svg {
+      width: 19px;
+      height: 19px;
+      stroke-width: 2;
     }
 
-    /* Hero Orb Section */
-    .hero-orb-section {
+    /* Scrollable Screen Canvas */
+    .screen-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 18px 24px;
+      display: flex;
+      flex-direction: column;
+      z-index: 60;
+    }
+    .screen-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Screen Views */
+    .screen-pane {
+      display: none;
+      animation: fadeInScreen 0.25s ease-out;
+    }
+    .screen-pane.active {
+      display: block;
+    }
+    @keyframes fadeInScreen {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Living Orb Section */
+    .orb-hero-card {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 14px;
+      padding: 6px 0 14px;
     }
 
-    .date-text {
+    .calendar-eyebrow {
       font-size: 11px;
       font-weight: 700;
+      letter-spacing: 0.8px;
       color: var(--text-secondary);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
-    .orb-stage {
-      width: 170px;
-      height: 170px;
+    /* Living Orb Stage */
+    .orb-stage-wrapper {
+      width: 180px;
+      height: 180px;
       position: relative;
       display: flex;
       align-items: center;
@@ -299,216 +401,278 @@
       margin: 4px 0 10px;
     }
 
-    .orb-ring-outer {
+    .orb-aura-halo {
       position: absolute;
-      width: 150px;
-      height: 150px;
+      width: 154px;
+      height: 154px;
       border-radius: 50%;
-      border: 2px solid var(--clear-border);
-      animation: pulseRing 3.5s infinite ease-out;
-      transition: border-color 0.5s ease;
+      background: var(--clear-glow);
+      filter: blur(14px);
+      opacity: 0.7;
+      transition: all 0.6s ease;
     }
 
-    .living-orb {
-      width: 110px;
-      height: 110px;
+    .orb-wave-ring {
+      position: absolute;
+      width: 144px;
+      height: 144px;
       border-radius: 50%;
-      background: var(--clear-accent);
-      box-shadow: 0 10px 30px var(--clear-glow);
+      border: 1.5px solid var(--clear-border);
+      animation: wavePulse 3.6s infinite cubic-bezier(0.16, 1, 0.3, 1);
+      transition: border-color 0.6s ease;
+    }
+
+    .orb-fissure-ring {
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 1.5px dashed var(--danger-primary);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .living-sphere {
+      width: 114px;
+      height: 114px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #68D69A 0%, var(--clear-accent) 45%, var(--clear-primary) 85%);
+      box-shadow:
+        inset 0 3px 8px rgba(255, 255, 255, 0.7),
+        inset 0 -5px 14px rgba(0, 0, 0, 0.25),
+        0 14px 34px var(--clear-glow);
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
-      animation: breatheOrb 3.5s infinite ease-in-out;
-      transition: all 0.5s ease;
+      animation: sphereBreathe 3.6s infinite ease-in-out;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .orb-inner {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: var(--clear-primary);
-      opacity: 0.85;
-      transition: background 0.5s ease;
-    }
-
-    .orb-glint {
+    .specular-glint {
       position: absolute;
-      top: 15px;
-      left: 20px;
-      width: 32px;
-      height: 32px;
+      top: 14px;
+      left: 18px;
+      width: 34px;
+      height: 24px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.45);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 100%);
+      transform: rotate(-25deg);
     }
 
-    /* Consequence Orb Animations */
-    @keyframes breatheOrb {
+    .dense-nucleus {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--clear-deep) 0%, var(--clear-primary) 100%);
+      opacity: 0.85;
+      transition: all 0.6s ease;
+    }
+
+    /* Orb Animations per Zone */
+    @keyframes sphereBreathe {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.06); }
+      50% { transform: scale(1.055); }
+    }
+    @keyframes wavePulse {
+      0% { transform: scale(0.92); opacity: 0.7; }
+      100% { transform: scale(1.4); opacity: 0; }
     }
 
-    @keyframes pulseRing {
-      0% { transform: scale(0.9); opacity: 0.7; }
-      100% { transform: scale(1.35); opacity: 0; }
+    .iphone-pro[data-zone="WARNING"] .living-sphere {
+      background: radial-gradient(circle at 35% 30%, #F5B853 0%, var(--warning-accent) 45%, var(--warning-primary) 85%);
+      box-shadow: inset 0 3px 8px rgba(255, 255, 255, 0.6), inset 0 -5px 14px rgba(0, 0, 0, 0.25), 0 14px 34px var(--warning-glow);
+      animation: sphereWarning 2.2s infinite ease-in-out;
     }
+    .iphone-pro[data-zone="WARNING"] .dense-nucleus { background: var(--warning-primary); }
+    .iphone-pro[data-zone="WARNING"] .orb-aura-halo { background: var(--warning-glow); }
+    .iphone-pro[data-zone="WARNING"] .orb-wave-ring { border-color: var(--warning-border); }
 
-    /* Corrupted animations for WARNING / DANGER / CRITICAL */
-    .iphone-frame[data-zone="WARNING"] .living-orb {
-      background: var(--warning-accent);
-      box-shadow: 0 10px 30px var(--warning-glow);
-      animation: breatheWarning 2.2s infinite ease-in-out;
+    .iphone-pro[data-zone="DANGER"] .living-sphere {
+      background: radial-gradient(circle at 35% 30%, #F07E52 0%, var(--danger-accent) 45%, var(--danger-primary) 85%);
+      box-shadow: inset 0 3px 8px rgba(255, 255, 255, 0.5), inset 0 -6px 16px rgba(0, 0, 0, 0.3), 0 14px 38px var(--danger-glow);
+      animation: sphereDanger 1.4s infinite ease-in-out;
     }
-    .iphone-frame[data-zone="WARNING"] .orb-inner { background: var(--warning-primary); }
-    .iphone-frame[data-zone="WARNING"] .orb-ring-outer { border-color: var(--warning-border); }
+    .iphone-pro[data-zone="DANGER"] .dense-nucleus { background: var(--danger-deep); }
+    .iphone-pro[data-zone="DANGER"] .orb-aura-halo { background: var(--danger-glow); }
+    .iphone-pro[data-zone="DANGER"] .orb-wave-ring { border-color: var(--danger-border); }
+    .iphone-pro[data-zone="DANGER"] .orb-fissure-ring { opacity: 0.65; border-color: var(--danger-primary); }
 
-    .iphone-frame[data-zone="DANGER"] .living-orb {
-      background: var(--danger-accent);
-      box-shadow: 0 10px 35px var(--danger-glow);
-      animation: breatheDanger 1.4s infinite ease-in-out;
+    .iphone-pro[data-zone="CRITICAL"] .living-sphere {
+      background: radial-gradient(circle at 35% 30%, #E64C62 0%, var(--critical-accent) 45%, var(--critical-primary) 85%);
+      box-shadow: inset 0 3px 8px rgba(255, 255, 255, 0.5), inset 0 -6px 18px rgba(0, 0, 0, 0.4), 0 16px 42px var(--critical-glow);
+      animation: sphereCritical 0.85s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-    .iphone-frame[data-zone="DANGER"] .orb-inner { background: var(--danger-primary); }
-    .iphone-frame[data-zone="DANGER"] .orb-ring-outer { border-color: var(--danger-border); }
+    .iphone-pro[data-zone="CRITICAL"] .dense-nucleus { background: var(--critical-deep); }
+    .iphone-pro[data-zone="CRITICAL"] .orb-aura-halo { background: var(--critical-glow); }
+    .iphone-pro[data-zone="CRITICAL"] .orb-wave-ring { border-color: var(--critical-border); }
+    .iphone-pro[data-zone="CRITICAL"] .orb-fissure-ring { opacity: 0.9; border-color: var(--critical-primary); }
 
-    .iphone-frame[data-zone="CRITICAL"] .living-orb {
-      background: var(--critical-accent);
-      box-shadow: 0 10px 40px var(--critical-glow);
-      animation: breatheCritical 0.9s infinite cubic-bezier(0.3, 0, 0.2, 1);
-    }
-    .iphone-frame[data-zone="CRITICAL"] .orb-inner { background: var(--critical-deep); }
-    .iphone-frame[data-zone="CRITICAL"] .orb-ring-outer { border-color: var(--critical-border); }
-
-    @keyframes breatheWarning {
+    @keyframes sphereWarning {
       0%, 100% { transform: scale(0.96); }
       50% { transform: scale(1.08); }
     }
-    @keyframes breatheDanger {
+    @keyframes sphereDanger {
       0%, 100% { transform: scale(0.92) rotate(-3deg); }
       50% { transform: scale(1.12) rotate(3deg); }
     }
-    @keyframes breatheCritical {
-      0%, 100% { transform: scale(0.88) rotate(-6deg); }
-      50% { transform: scale(1.16) rotate(6deg); }
+    @keyframes sphereCritical {
+      0%, 100% { transform: scale(0.86) rotate(-5deg); }
+      50% { transform: scale(1.18) rotate(5deg); }
     }
 
-    /* Zone Pill */
-    .zone-pill {
-      padding: 4px 12px;
-      border-radius: 99px;
+    /* Status Pill */
+    .consequence-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 999px;
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
       text-transform: uppercase;
       background: var(--clear-surface);
       color: var(--clear-primary);
       border: 1px solid var(--clear-border);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       transition: all 0.4s ease;
     }
 
     /* Brutal Honesty Banner */
-    .honesty-card {
+    .accountability-banner {
       width: 100%;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px 14px;
+      border-radius: 18px;
+      padding: 14px 16px;
       text-align: center;
+      box-shadow: 0 2px 8px rgba(18, 26, 23, 0.04);
       transition: all 0.4s ease;
     }
 
-    .honesty-text {
+    .banner-quote {
       font-size: 13px;
-      line-height: 19px;
+      line-height: 20px;
       font-weight: 600;
       color: var(--text-primary);
+      letter-spacing: -0.2px;
     }
 
-    .factor-tags {
+    .factor-chips-container {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 6px;
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
-    .factor-tag {
-      font-size: 11px;
+    .factor-chip-item {
+      font-size: 10px;
       font-weight: 700;
       color: var(--critical-primary);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 999px;
     }
 
-    /* Habit Cards */
-    .habit-card {
+    /* Habit Module Cards */
+    .habit-spec-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 14px 16px;
       margin-top: 10px;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
       cursor: pointer;
     }
 
-    .habit-card:hover {
-      box-shadow: 0 4px 12px rgba(13, 26, 20, 0.06);
+    .habit-spec-card:hover {
+      border-color: #CBD8D1;
+      box-shadow: 0 4px 14px rgba(18, 26, 23, 0.06);
     }
 
-    .habit-header {
+    .card-top-line {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
-    .habit-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-primary);
+    .card-title-group {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .habit-badge {
+    .icon-symbol-box {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-primary);
+    }
+    .icon-symbol-box svg {
+      width: 15px;
+      height: 15px;
+      stroke-width: 2.2;
+    }
+
+    .card-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.2px;
+    }
+
+    .severity-tag {
       font-size: 10px;
       font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 99px;
+      letter-spacing: 0.3px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
       background: var(--clear-surface);
       color: var(--clear-primary);
       border: 1px solid var(--clear-border);
-      text-transform: uppercase;
     }
 
-    .habit-body {
+    .card-data-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end;
     }
 
-    .habit-value-num {
-      font-size: 24px;
+    .stat-number {
+      font-size: 26px;
       font-weight: 800;
       color: var(--text-primary);
-      letter-spacing: -0.5px;
+      letter-spacing: -0.8px;
+      font-variant-numeric: tabular-nums;
     }
 
-    .habit-value-unit {
+    .stat-unit {
       font-size: 13px;
-      color: var(--text-secondary);
       font-weight: 600;
+      color: var(--text-secondary);
       margin-left: 4px;
     }
 
-    .habit-sub {
+    .stat-context {
       font-size: 11px;
+      font-weight: 500;
       color: var(--text-secondary);
       margin-top: 2px;
     }
 
-    .quick-tap-btn {
+    .action-pill-btn {
       min-height: 36px;
-      padding: 0 12px;
+      padding: 0 14px;
       border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--surface-subtle);
@@ -518,22 +682,30 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      transition: background 0.2s;
+      gap: 5px;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .action-pill-btn:hover {
+      background: #E8EFEA;
+    }
+    .action-pill-btn:active {
+      transform: scale(0.97);
+    }
+    .action-pill-btn svg {
+      width: 13px;
+      height: 13px;
+      stroke-width: 2.2;
     }
 
-    .quick-tap-btn:hover {
-      background: #E4ECE8;
-    }
-
-    /* Quick Actions Row */
-    .quick-actions-row {
+    /* Quick Action Buttons */
+    .dashboard-action-footer {
       margin-top: 14px;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    .btn-urge {
+    .primary-urge-trigger {
       width: 100%;
       height: 48px;
       background: var(--text-primary);
@@ -547,111 +719,209 @@
       justify-content: center;
       gap: 8px;
       cursor: pointer;
-      transition: transform 0.15s ease;
+      transition: transform 0.15s ease, background 0.2s;
     }
-
-    .btn-urge:hover {
+    .primary-urge-trigger:hover {
+      background: #25332E;
       transform: scale(0.99);
     }
+    .primary-urge-trigger svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2.2;
+    }
 
-    .secondary-actions {
+    .dual-button-row {
       display: flex;
       gap: 8px;
     }
 
-    .sec-btn {
+    .secondary-row-btn {
       flex: 1;
       height: 42px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
       border-radius: 12px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
       cursor: pointer;
+      transition: background 0.15s;
+    }
+    .secondary-row-btn:hover {
+      background: #E6EEEA;
+    }
+    .secondary-row-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
     }
 
-    /* Screen Tab Navigation below device */
-    .screen-tabs {
+    /* Navigation Dock / Screen Tabs below phone */
+    .showcase-dock {
       display: flex;
       gap: 8px;
-      margin-top: 20px;
+      margin-top: 24px;
       flex-wrap: wrap;
       justify-content: center;
+      max-width: 720px;
     }
 
-    .screen-tab-btn {
-      background: #18211E;
-      color: #8C9993;
-      border: 1px solid #2B3833;
-      padding: 8px 16px;
-      border-radius: 10px;
+    .dock-tab {
+      background: #141C18;
+      color: #8C9C94;
+      border: 1px solid #23302A;
+      padding: 9px 16px;
+      border-radius: 12px;
       font-size: 12px;
       font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .dock-tab svg {
+      width: 15px;
+      height: 15px;
+      stroke-width: 2;
+    }
+    .dock-tab:hover {
+      color: #FFFFFF;
+      background: #1E2B25;
+    }
+    .dock-tab.active {
+      background: #1B2922;
+      color: #48C07E;
+      border-color: #48C07E;
     }
 
-    .screen-tab-btn.active, .screen-tab-btn:hover {
-      background: #283731;
-      color: #54C98A;
-      border-color: #54C98A;
+    /* Subscreen Header */
+    .subscreen-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-top: 4px;
+    }
+    .back-btn-ios {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+    .back-btn-ios svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2.2;
+    }
+    .subscreen-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
     }
 
-    /* Screen View Container */
-    .screen-view {
-      display: none;
-    }
-    .screen-view.active {
-      display: block;
-    }
-
-    /* Wallet View styling */
-    .wallet-hero {
-      background: #FFFFFF;
+    /* Wallet View Specifics */
+    .wallet-hero-ledger {
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 16px;
+      border-radius: 20px;
+      padding: 18px;
       margin-bottom: 12px;
     }
-    .wallet-hero-label {
+    .avoided-eyebrow {
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.5px;
       color: var(--text-secondary);
+      text-transform: uppercase;
     }
-    .wallet-hero-val {
-      font-size: 30px;
+    .avoided-figure {
+      font-size: 32px;
       font-weight: 800;
       color: var(--clear-primary);
-      margin: 4px 0 6px;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.8px;
+      margin: 4px 0 8px;
+      font-variant-numeric: tabular-nums;
     }
-    .wallet-hero-desc {
+    .avoided-explanation {
       font-size: 12px;
-      line-height: 17px;
+      line-height: 18px;
       color: var(--text-secondary);
     }
-    .wallet-grid {
+
+    .dual-stat-split {
       display: flex;
       gap: 8px;
       margin-bottom: 12px;
     }
-    .wallet-cell {
+    .stat-split-box {
       flex: 1;
-      background: #FFFFFF;
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px;
+      border-radius: 16px;
+      padding: 14px;
     }
 
-    /* Heatmap mini */
-    .heatmap-grid {
+    /* Urge Arena Specifics */
+    .breathing-sanctuary {
+      height: 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin: 8px 0 16px;
+    }
+    .guided-breath-orb {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #68D69A 0%, var(--clear-accent) 70%, var(--clear-primary) 100%);
+      opacity: 0.6;
+      animation: boxBreathAnim 14s infinite ease-in-out;
+      position: absolute;
+      box-shadow: 0 0 40px var(--clear-glow);
+    }
+    @keyframes boxBreathAnim {
+      0% { transform: scale(1); }
+      28% { transform: scale(1.38); }
+      57% { transform: scale(1.38); }
+      85% { transform: scale(1); }
+      100% { transform: scale(1); }
+    }
+    .breath-counter {
+      font-size: 44px;
+      font-weight: 800;
+      color: var(--text-primary);
+      z-index: 10;
+      letter-spacing: -1px;
+    }
+    .breath-phase-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      z-index: 10;
+      margin-top: 4px;
+    }
+
+    /* 28-day Heatmap */
+    .heatmap-28d {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 5px;
       margin-top: 10px;
     }
-    .h-cell {
+    .heat-cell {
       aspect-ratio: 1;
       border-radius: 6px;
       font-size: 10px;
@@ -663,199 +933,242 @@
       color: var(--clear-primary);
       border: 1px solid var(--clear-border);
     }
-    .h-cell.w { background: var(--warning-surface); color: var(--warning-primary); border-color: var(--warning-border); }
-    .h-cell.d { background: var(--danger-surface); color: var(--danger-primary); border-color: var(--danger-border); }
-    .h-cell.c { background: var(--critical-surface); color: var(--critical-deep); border-color: var(--critical-border); }
-
-    /* Urge modal simulation */
-    .urge-arena {
-      height: 240px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .urge-orb {
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      background: var(--clear-primary);
-      opacity: 0.6;
-      animation: urgeBreathe 14s infinite ease-in-out;
-      position: absolute;
-    }
-    @keyframes urgeBreathe {
-      0% { transform: scale(1); }
-      28% { transform: scale(1.4); }
-      57% { transform: scale(1.4); }
-      85% { transform: scale(1); }
-      100% { transform: scale(1); }
-    }
-    .urge-timer {
-      font-size: 38px;
-      font-weight: 800;
-      z-index: 2;
-      color: var(--text-primary);
-    }
+    .heat-cell.warn { background: var(--warning-surface); color: var(--warning-primary); border-color: var(--warning-border); }
+    .heat-cell.danger { background: var(--danger-surface); color: var(--danger-primary); border-color: var(--danger-border); }
+    .heat-cell.crit { background: var(--critical-surface); color: var(--critical-deep); border-color: var(--critical-border); }
+    .heat-cell.today { border: 2px solid var(--text-primary); font-weight: 800; }
   </style>
 </head>
 <body>
 
-  <div class="top-header">
-    <div class="badge-tag">DIRECTION A • WHITE CORRUPTION SHOWCASE</div>
-    <h1>KuroStop Interactive UI Simulator</h1>
-    <p class="tagline">Pratinjau visual langsung sistem konsekuensi visual KuroStop (iOS Light Theme + Environmental Decay).</p>
+  <!-- Top Showcase Navigation -->
+  <div class="showcase-header">
+    <div class="eyebrow-badge">
+      <span class="eyebrow-dot"></span>
+      Apple HIG & Huashu Design Standard
+    </div>
+    <h1 class="brand-title">KuroStop Consequence Interface</h1>
+    <p class="brand-sub">Sistem konsekuensi personal iOS dengan arsitektur <em>White Corruption</em>. Zero emoji, 100% vector symbol library, dan degradasi visual deterministik.</p>
 
-    <!-- Zone Controller -->
-    <div class="controls-panel">
-      <span class="control-label">Uji Respon Zona:</span>
-      <div class="zone-buttons">
-        <button class="zone-btn active" data-zone="CLEAR" onclick="setZone('CLEAR')">1. CLEAR (Bersih)</button>
-        <button class="zone-btn" data-zone="WARNING" onclick="setZone('WARNING')">2. WARNING (+1 Rokok)</button>
-        <button class="zone-btn" data-zone="DANGER" onclick="setZone('DANGER')">3. DANGER (3 Batang)</button>
-        <button class="zone-btn" data-zone="CRITICAL" onclick="setZone('CRITICAL')">4. CRITICAL (Pelanggaran)</button>
-      </div>
+    <!-- Zone Tester -->
+    <div class="zone-toolbar">
+      <button class="zone-trigger active" data-zone="CLEAR" onclick="setZone('CLEAR')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        1. CLEAR
+      </button>
+      <button class="zone-trigger" data-zone="WARNING" onclick="setZone('WARNING')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        2. WARNING
+      </button>
+      <button class="zone-trigger" data-zone="DANGER" onclick="setZone('DANGER')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        3. DANGER
+      </button>
+      <button class="zone-trigger" data-zone="CRITICAL" onclick="setZone('CRITICAL')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        4. CRITICAL
+      </button>
     </div>
   </div>
 
-  <!-- Device Frame (iPhone 16 Pro) -->
-  <div class="device-stage">
-    <div class="iphone-frame" id="phoneFrame" data-zone="CLEAR">
-      <div class="notch-bar"></div>
-      
-      <div class="status-bar">
-        <span>02:40</span>
-        <span>􀐫 􀙇 100%</span>
+  <!-- iPhone Pro Mockup -->
+  <div class="device-viewport">
+    <div class="iphone-pro" id="phoneContainer" data-zone="CLEAR">
+      <div class="vignette-overlay"></div>
+
+      <!-- Dynamic Island -->
+      <div class="dynamic-island">
+        <div class="sensor-dot"></div>
+        <div class="camera-lens"></div>
       </div>
 
-      <div class="screen-body">
-        
-        <!-- ================= SCREEN 1: DASHBOARD ================= -->
-        <div class="screen-view active" id="view-dashboard">
-          <div class="app-topbar">
-            <div class="app-logo">
-              KUROSTOP
-              <div class="live-dot" id="liveDot"></div>
-            </div>
-            <div class="top-nav-icons">
-              <span class="nav-icon-btn" onclick="showScreen('history')">📅</span>
-              <span class="nav-icon-btn" onclick="showScreen('wallet')">👛</span>
-              <span class="nav-icon-btn" onclick="showScreen('settings')">⚙️</span>
-            </div>
-          </div>
+      <!-- Status Bar -->
+      <div class="status-bar-ios">
+        <span>02:44</span>
+        <div class="status-icons">
+          <!-- Cellular -->
+          <svg viewBox="0 0 24 24"><path d="M2 18h2v-4H2v4Zm4 0h2v-7H6v7Zm4 0h2v-11h-2v11Zm4 0h2V3h-2v15Z"/></svg>
+          <!-- Wifi -->
+          <svg viewBox="0 0 24 24"><path d="M12 18a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm-6.36-4.95a9 9 0 0 1 12.72 0l-1.41 1.41a7 7 0 0 0-9.9 0l-1.41-1.41Zm-2.83-2.83a13 13 0 0 1 18.38 0l-1.41 1.41a11 11 0 0 0-15.56 0l-1.41-1.41Z"/></svg>
+          <!-- Battery -->
+          <svg viewBox="0 0 24 24"><path d="M16 8H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm4 3h1v2h-1v-2Z"/></svg>
+        </div>
+      </div>
 
-          <div class="hero-orb-section">
-            <span class="date-text">Kamis, 5 November 2026</span>
+      <!-- App Header -->
+      <div class="app-nav-header">
+        <div class="brand-mark">
+          <span class="brand-wordmark">KUROSTOP</span>
+          <div class="pulse-status-beacon" id="beaconDot"></div>
+        </div>
+        <div class="header-actions">
+          <button class="header-icon-btn" onclick="openScreen('history')" title="Riwayat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </button>
+          <button class="header-icon-btn" onclick="openScreen('wallet')" title="Kalkulator Rokok">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+          </button>
+          <button class="header-icon-btn" onclick="openScreen('settings')" title="Pengaturan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Screen Content Canvas -->
+      <div class="screen-scroll">
+
+        <!-- ================= PANE 1: DASHBOARD ================= -->
+        <div class="screen-pane active" id="pane-dashboard">
+          <div class="orb-hero-card">
+            <span class="calendar-eyebrow">Kamis, 5 November 2026</span>
             
-            <div class="orb-stage">
-              <div class="orb-ring-outer"></div>
-              <div class="living-orb">
-                <div class="orb-glint"></div>
-                <div class="orb-inner"></div>
+            <div class="orb-stage-wrapper">
+              <div class="orb-aura-halo"></div>
+              <div class="orb-wave-ring"></div>
+              <div class="orb-fissure-ring"></div>
+              <div class="living-sphere">
+                <div class="specular-glint"></div>
+                <div class="dense-nucleus"></div>
               </div>
             </div>
 
-            <div class="zone-pill" id="zonePill">ZONA BERSIH • KENDALI PENUH</div>
+            <div class="consequence-pill" id="zoneBadgeText">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>ZONA BERSIH • KENDALI PENUH</span>
+            </div>
 
-            <div class="honesty-card" id="honestyCard">
-              <div class="honesty-text" id="honestyText">"Masih ada di tanganmu. Jaga ritme hari ini."</div>
-              <div class="factor-tags" id="factorTags"></div>
+            <div class="accountability-banner" id="bannerCard">
+              <p class="banner-quote" id="bannerQuote">"Masih ada di tanganmu. Jaga ritme hari ini."</p>
+              <div class="factor-chips-container" id="factorChips"></div>
             </div>
           </div>
 
           <!-- Habit 1: Smoking -->
-          <div class="habit-card" onclick="showScreen('smoking')">
-            <div class="habit-header">
-              <span class="habit-title">🔥 Merokok</span>
-              <span class="habit-badge" id="smokeBadge">Bersih (0 btg)</span>
-            </div>
-            <div class="habit-body">
-              <div>
-                <span class="habit-value-num" id="smokeNum">0</span>
-                <span class="habit-value-unit">batang</span>
-                <div class="habit-sub" id="smokeSub">Target harian: 0 batang</div>
+          <div class="habit-spec-card" onclick="openScreen('smoking')">
+            <div class="card-top-line">
+              <div class="card-title-group">
+                <div class="icon-symbol-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                </div>
+                <span class="card-label">Merokok</span>
               </div>
-              <button class="quick-tap-btn" onclick="event.stopPropagation(); quickAddSmoke();">+1 Batang</button>
+              <span class="severity-tag" id="smokeSeverityTag">Bersih (0 btg)</span>
+            </div>
+            <div class="card-data-row">
+              <div>
+                <span class="stat-number" id="smokeCountNum">0</span>
+                <span class="stat-unit">batang</span>
+                <div class="stat-context" id="smokeContextText">Target harian: 0 batang</div>
+              </div>
+              <button class="action-pill-btn" onclick="event.stopPropagation(); triggerAddSmoke();">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                1 Batang
+              </button>
             </div>
           </div>
 
           <!-- Habit 2: PMO -->
-          <div class="habit-card" onclick="showScreen('pmo')">
-            <div class="habit-header">
-              <span class="habit-title">👁️ PMO / Masturbasi</span>
-              <span class="habit-badge" id="pmoBadge">Bersih (0 sesi)</span>
-            </div>
-            <div class="habit-body">
-              <div>
-                <span class="habit-value-num" id="pmoNum">0</span>
-                <span class="habit-value-unit">sesi</span>
-                <div class="habit-sub">Pikiran bersih • Target 0</div>
+          <div class="habit-spec-card" onclick="openScreen('pmo')">
+            <div class="card-top-line">
+              <div class="card-title-group">
+                <div class="icon-symbol-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <span class="card-label">PMO & Masturbasi</span>
               </div>
-              <button class="quick-tap-btn" onclick="event.stopPropagation(); showScreen('pmo');">Catat Sesi</button>
+              <span class="severity-tag" id="pmoSeverityTag">Bersih (0 sesi)</span>
+            </div>
+            <div class="card-data-row">
+              <div>
+                <span class="stat-number" id="pmoCountNum">0</span>
+                <span class="stat-unit">sesi</span>
+                <div class="stat-context">Target: 0 toleransi harian</div>
+              </div>
+              <button class="action-pill-btn" onclick="event.stopPropagation(); openScreen('pmo');">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                Catat Sesi
+              </button>
             </div>
           </div>
 
           <!-- Habit 3: Sleep -->
-          <div class="habit-card" onclick="showScreen('sleep')">
-            <div class="habit-header">
-              <span class="habit-title">🌙 Tidur & Begadang</span>
-              <span class="habit-badge" id="sleepBadge">Tepat Waktu</span>
-            </div>
-            <div class="habit-body">
-              <div>
-                <span class="habit-value-num">23:00</span>
-                <span class="habit-value-unit">target</span>
-                <div class="habit-sub" id="sleepSub">Belum tidur malam ini</div>
+          <div class="habit-spec-card" onclick="openScreen('sleep')">
+            <div class="card-top-line">
+              <div class="card-title-group">
+                <div class="icon-symbol-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                </div>
+                <span class="card-label">Tidur & Begadang</span>
               </div>
-              <button class="quick-tap-btn" onclick="event.stopPropagation(); toggleSleep();" id="sleepBtn">Mau Tidur</button>
+              <span class="severity-tag" id="sleepSeverityTag">Tepat Waktu</span>
+            </div>
+            <div class="card-data-row">
+              <div>
+                <span class="stat-number">23:00</span>
+                <span class="stat-unit">target</span>
+                <div class="stat-context" id="sleepContextText">Belum mencatat jam tidur</div>
+              </div>
+              <button class="action-pill-btn" onclick="event.stopPropagation(); toggleSleepState();" id="sleepStateBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+                <span id="sleepStateLabel">Mau Tidur</span>
+              </button>
             </div>
           </div>
 
-          <!-- Quick Actions -->
-          <div class="quick-actions-row">
-            <button class="btn-urge" onclick="showScreen('urge')">
-              🛡️ Gue Lagi Pengen...
+          <!-- Bottom Action Buttons -->
+          <div class="dashboard-action-footer">
+            <button class="primary-urge-trigger" onclick="openScreen('urge')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              Gue Lagi Pengen...
             </button>
-            <div class="secondary-actions">
-              <button class="sec-btn" onclick="showScreen('smoking')">+ Catat Detail</button>
-              <button class="sec-btn" onclick="showScreen('wallet')">Beli Rokok</button>
+            <div class="dual-button-row">
+              <button class="secondary-row-btn" onclick="openScreen('smoking')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Catat Detail
+              </button>
+              <button class="secondary-row-btn" onclick="openScreen('wallet')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                Beli Rokok
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- ================= SCREEN 2: WALLET ================= -->
-        <div class="screen-view" id="view-wallet">
-          <div class="app-topbar">
-            <span class="nav-icon-btn" onclick="showScreen('dashboard')">‹ Kembali</span>
-            <span style="font-weight: 700; font-size: 15px;">Kalkulator Rokok</span>
-            <span style="width: 20px;"></span>
+        <!-- ================= PANE 2: WALLET ================= -->
+        <div class="screen-pane" id="pane-wallet">
+          <div class="subscreen-bar">
+            <button class="back-btn-ios" onclick="openScreen('dashboard')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg>
+              Dashboard
+            </button>
+            <span class="subscreen-title">Kalkulator Keuangan</span>
+            <div style="width: 24px;"></div>
           </div>
 
-          <div class="wallet-hero">
-            <div class="wallet-hero-label">Perkiraan Pengeluaran yang Dihindari</div>
-            <div class="wallet-hero-val">+Rp 244.000</div>
-            <div class="wallet-hero-desc">Estimasi uang nyata yang berhasil kamu pertahankan di rekening dibanding kebiasaan lama (baseline Rp 30.000/hari).</div>
+          <div class="wallet-hero-ledger">
+            <span class="avoided-eyebrow">Perkiraan Pengeluaran yang Dihindari</span>
+            <div class="avoided-figure">+Rp 244.000</div>
+            <p class="avoided-explanation">Perkiraan uang nyata yang tidak jadi dibelanjakan dibanding baseline harian (Rp 30.000/hari).</p>
           </div>
 
-          <div class="wallet-grid">
-            <div class="wallet-cell">
-              <div class="wallet-hero-label">Keluar Nyata</div>
-              <div style="font-size: 16px; font-weight: 800; color: #D83D52; margin-top: 4px;">Rp 56.000</div>
-              <div class="habit-sub">2 bungkus tercatat</div>
+          <div class="dual-stat-split">
+            <div class="stat-split-box">
+              <span class="avoided-eyebrow">Pengeluaran Riil</span>
+              <div style="font-size: 18px; font-weight: 800; color: #D32F45; margin-top: 4px;">Rp 56.000</div>
+              <div class="stat-context">2 bungkus tercatat</div>
             </div>
-            <div class="wallet-cell">
-              <div class="wallet-hero-label">Baseline 10 Hari</div>
-              <div style="font-size: 16px; font-weight: 800; color: #18211E; margin-top: 4px;">Rp 300.000</div>
-              <div class="habit-sub">Rp 30.000 / hari</div>
+            <div class="stat-split-box">
+              <span class="avoided-eyebrow">Ekspektasi Baseline</span>
+              <div style="font-size: 18px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">Rp 300.000</div>
+              <div class="stat-context">10 hari terlacak</div>
             </div>
           </div>
 
-          <div class="honesty-card" style="text-align: left; margin-bottom: 12px;">
-            <div style="font-size: 13px; font-weight: 700; margin-bottom: 6px;">Proyeksi Tabungan Masa Depan:</div>
-            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
-              <span>1 Bulan (30 Hari):</span>
-              <strong>Rp 900.000</strong>
+          <div class="habit-spec-card" style="margin-top: 0; margin-bottom: 14px;">
+            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Potensi Tabungan Masa Depan:</div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+              <span style="color: var(--text-secondary);">1 Bulan (30 Hari):</span>
+              <strong style="color: var(--text-primary);">Rp 900.000</strong>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--clear-primary);">
               <span>1 Tahun Penuh (365 Hari):</span>
@@ -863,189 +1176,325 @@
             </div>
           </div>
 
-          <button class="btn-urge" onclick="alert('Modal input pembelian rokok terbuka.');">+ Catat Pembelian Baru</button>
+          <button class="primary-urge-trigger" onclick="alert('Form pencatatan pembelian rokok dibuka.');">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Catat Pembelian Baru
+          </button>
         </div>
 
-        <!-- ================= SCREEN 3: URGE INTERRUPTION ================= -->
-        <div class="screen-view" id="view-urge">
-          <div class="app-topbar">
-            <span class="nav-icon-btn" onclick="showScreen('dashboard')">✕ Tutup</span>
-            <span style="font-weight: 700; font-size: 15px;">Interupsi Dorongan</span>
-            <span style="width: 20px;"></span>
+        <!-- ================= PANE 3: URGE INTERRUPTION ================= -->
+        <div class="screen-pane" id="pane-urge">
+          <div class="subscreen-bar">
+            <button class="back-btn-ios" onclick="openScreen('dashboard')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Batal
+            </button>
+            <span class="subscreen-title">Interupsi Dorongan</span>
+            <div style="width: 24px;"></div>
           </div>
 
-          <div style="text-align: center; margin-top: 6px;">
-            <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">Fokus pada Napas (90 Detik)</div>
+          <div style="text-align: center; margin-top: 4px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px;">
+              Latihan Napas Box Breathing
+            </div>
           </div>
 
-          <div class="urge-arena">
-            <div class="urge-orb"></div>
-            <div class="urge-timer" id="urgeCount">90s</div>
-            <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-top: 6px;">Tarik Napas...</div>
+          <div class="breathing-sanctuary">
+            <div class="guided-breath-orb"></div>
+            <div class="breath-counter" id="timerCount">90s</div>
+            <div class="breath-phase-text" id="phaseText">Tarik Napas...</div>
           </div>
 
-          <div class="honesty-card" style="margin-bottom: 16px;">
-            <div class="honesty-text" style="font-size: 12px;">"Dorongan impulsif otak mencapai puncaknya dalam 3–5 menit lalu mereda. Kamu tidak harus melawannya, cukup amati tanpa bertindak."</div>
+          <div class="accountability-banner" style="margin-bottom: 16px;">
+            <p class="banner-quote" style="font-size: 12px;">"Dorongan impulsif otak mencapai puncaknya dalam 3–5 menit lalu mereda secara alami. Amati dorongan ini tanpa bereaksi."</p>
           </div>
 
           <div style="display: flex; gap: 8px;">
-            <button class="sec-btn" style="color: #D83D52;" onclick="showScreen('dashboard'); alert('Dicatat sebagai kompromi.');">Aku Khilaf (Catat)</button>
-            <button class="btn-urge" style="flex: 2; height: 42px;" onclick="showScreen('dashboard'); alert('Selamat! Kemenangan menahan dorongan dicatat di SQLite.');">Aku Berhasil Menahan</button>
+            <button class="secondary-row-btn" style="color: var(--critical-primary);" onclick="openScreen('dashboard'); alert('Dicatat secara jujur sebagai kompromi.');">
+              Aku Khilaf (Catat)
+            </button>
+            <button class="primary-urge-trigger" style="flex: 1.8; height: 42px;" onclick="openScreen('dashboard'); alert('Kemenangan menahan dorongan disimpan di database!');">
+              Aku Berhasil Menahan
+            </button>
           </div>
         </div>
 
-        <!-- ================= SCREEN 4: HISTORY ================= -->
-        <div class="screen-view" id="view-history">
-          <div class="app-topbar">
-            <span class="nav-icon-btn" onclick="showScreen('dashboard')">‹ Kembali</span>
-            <span style="font-weight: 700; font-size: 15px;">Peta 28 Hari</span>
-            <span style="width: 20px;"></span>
+        <!-- ================= PANE 4: HISTORY HEATMAP ================= -->
+        <div class="screen-pane" id="pane-history">
+          <div class="subscreen-bar">
+            <button class="back-btn-ios" onclick="openScreen('dashboard')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg>
+              Dashboard
+            </button>
+            <span class="subscreen-title">Peta Konsekuensi 28 Hari</span>
+            <div style="width: 24px;"></div>
           </div>
 
-          <div class="wallet-grid">
-            <div class="wallet-cell">
-              <div class="wallet-hero-label">Streak Bersih</div>
+          <div class="dual-stat-split">
+            <div class="stat-split-box">
+              <span class="avoided-eyebrow">Streak Bersih</span>
               <div style="font-size: 24px; font-weight: 800; color: var(--clear-primary); margin-top: 2px;">8 Hari</div>
+              <div class="stat-context">Tanpa kompromi</div>
             </div>
-            <div class="wallet-cell">
-              <div class="wallet-hero-label">Urge Dimenangkan</div>
-              <div style="font-size: 24px; font-weight: 800; color: #18211E; margin-top: 2px;">14 / 16</div>
-            </div>
-          </div>
-
-          <div class="honesty-card" style="margin-bottom: 12px; text-align: left;">
-            <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">Peta Disiplin 4 Minggu:</div>
-            <div class="heatmap-grid">
-              <div class="h-cell">1</div><div class="h-cell">2</div><div class="h-cell w">3</div><div class="h-cell">4</div>
-              <div class="h-cell">5</div><div class="h-cell">6</div><div class="h-cell">7</div><div class="h-cell">8</div>
-              <div class="h-cell d">9</div><div class="h-cell">10</div><div class="h-cell">11</div><div class="h-cell">12</div>
-              <div class="h-cell">13</div><div class="h-cell c">14</div><div class="h-cell">15</div><div class="h-cell">16</div>
-              <div class="h-cell">17</div><div class="h-cell">18</div><div class="h-cell">19</div><div class="h-cell">20</div>
-              <div class="h-cell">21</div><div class="h-cell">22</div><div class="h-cell">23</div><div class="h-cell">24</div>
-              <div class="h-cell">25</div><div class="h-cell">26</div><div class="h-cell">27</div><div class="h-cell" style="border: 2px solid #18211E;">28</div>
+            <div class="stat-split-box">
+              <span class="avoided-eyebrow">Urge Dimenangkan</span>
+              <div style="font-size: 24px; font-weight: 800; color: var(--text-primary); margin-top: 2px;">14 / 16</div>
+              <div class="stat-context">87.5% disiplin</div>
             </div>
           </div>
 
-          <button class="sec-btn" style="width: 100%;" onclick="showScreen('dashboard')">Kembali ke Dashboard</button>
+          <div class="habit-spec-card" style="margin-top: 0; margin-bottom: 14px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Peta Matriks 4 Minggu:</div>
+            <div class="heatmap-28d">
+              <div class="heat-cell">1</div><div class="heat-cell">2</div><div class="heat-cell warn">3</div><div class="heat-cell">4</div>
+              <div class="heat-cell">5</div><div class="heat-cell">6</div><div class="heat-cell">7</div><div class="heat-cell">8</div>
+              <div class="heat-cell danger">9</div><div class="heat-cell">10</div><div class="heat-cell">11</div><div class="heat-cell">12</div>
+              <div class="heat-cell">13</div><div class="heat-cell crit">14</div><div class="heat-cell">15</div><div class="heat-cell">16</div>
+              <div class="heat-cell">17</div><div class="heat-cell">18</div><div class="heat-cell">19</div><div class="heat-cell">20</div>
+              <div class="heat-cell">21</div><div class="heat-cell">22</div><div class="heat-cell">23</div><div class="heat-cell">24</div>
+              <div class="heat-cell">25</div><div class="heat-cell">26</div><div class="heat-cell">27</div><div class="heat-cell today">28</div>
+            </div>
+          </div>
+
+          <button class="secondary-row-btn" style="width: 100%; height: 44px;" onclick="openScreen('dashboard')">
+            Kembali ke Dashboard
+          </button>
+        </div>
+
+        <!-- ================= PANE 5: SMOKING DETAIL ================= -->
+        <div class="screen-pane" id="pane-smoking">
+          <div class="subscreen-bar">
+            <button class="back-btn-ios" onclick="openScreen('dashboard')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg>
+              Dashboard
+            </button>
+            <span class="subscreen-title">Detail Merokok</span>
+            <div style="width: 24px;"></div>
+          </div>
+
+          <div class="dual-stat-split">
+            <div class="stat-split-box">
+              <span class="avoided-eyebrow">Batang Hari Ini</span>
+              <div style="font-size: 26px; font-weight: 800; color: var(--text-primary); margin-top: 2px;" id="detailSmokeNum">0</div>
+            </div>
+            <div class="stat-split-box">
+              <span class="avoided-eyebrow">Uang Keluar Bulan Ini</span>
+              <div style="font-size: 18px; font-weight: 800; color: #D32F45; margin-top: 4px;">Rp 56.000</div>
+            </div>
+          </div>
+
+          <button class="action-pill-btn" style="width: 100%; height: 42px; justify-content: center; margin-bottom: 14px;" onclick="triggerAddSmoke();">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Catat 1 Batang Rokok
+          </button>
+
+          <div class="accountability-banner" style="text-align: left;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Riwayat Hari Ini:</div>
+            <p style="font-size: 12px; color: var(--text-secondary);" id="smokeLogHistoryText">Belum ada batang rokok tercatat hari ini.</p>
+          </div>
+        </div>
+
+        <!-- ================= PANE 6: PMO DETAIL ================= -->
+        <div class="screen-pane" id="pane-pmo">
+          <div class="subscreen-bar">
+            <button class="back-btn-ios" onclick="openScreen('dashboard')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg>
+              Dashboard
+            </button>
+            <span class="subscreen-title">Detail PMO</span>
+            <div style="width: 24px;"></div>
+          </div>
+
+          <div class="dual-stat-split">
+            <div class="stat-split-box">
+              <span class="avoided-eyebrow">Sesi Hari Ini</span>
+              <div style="font-size: 26px; font-weight: 800; color: var(--text-primary); margin-top: 2px;" id="detailPmoNum">0</div>
+            </div>
+            <div class="stat-split-box">
+              <span class="avoided-eyebrow">Target Toleransi</span>
+              <div style="font-size: 26px; font-weight: 800; color: var(--clear-primary); margin-top: 2px;">0</div>
+            </div>
+          </div>
+
+          <div class="accountability-banner" style="text-align: left; margin-bottom: 14px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Prinsip Akuntabilitas:</div>
+            <p style="font-size: 12px; line-height: 18px; color: var(--text-secondary);">Dorongan seksual impulsif hanya bertahan beberapa menit, tetapi penyesalan dan penurunan energi berlangsung berjam-jam. Gunakan tombol interupsi saat dorongan muncul.</p>
+          </div>
+
+          <button class="primary-urge-trigger" onclick="openScreen('urge');">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Ada Dorongan? Buka Interupsi
+          </button>
         </div>
 
       </div>
     </div>
   </div>
 
-  <!-- Screen Selector Tabs -->
-  <div class="screen-tabs">
-    <button class="screen-tab-btn active" onclick="showScreen('dashboard')">📱 Dashboard</button>
-    <button class="screen-tab-btn" onclick="showScreen('wallet')">👛 Kalkulator Dompet</button>
-    <button class="screen-tab-btn" onclick="showScreen('urge')">🛡️ Interupsi Dorongan</button>
-    <button class="screen-tab-btn" onclick="showScreen('history')">📅 Heatmap Riwayat</button>
+  <!-- Dock Tabs to Navigate Mockup -->
+  <div class="showcase-dock">
+    <button class="dock-tab active" onclick="openScreen('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="dock-tab" onclick="openScreen('smoking')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      Merokok
+    </button>
+    <button class="dock-tab" onclick="openScreen('pmo')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      PMO & Masturbasi
+    </button>
+    <button class="dock-tab" onclick="openScreen('wallet')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+      Kalkulator Rokok
+    </button>
+    <button class="dock-tab" onclick="openScreen('urge')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      Interupsi Dorongan
+    </button>
+    <button class="dock-tab" onclick="openScreen('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Peta 28 Hari
+    </button>
   </div>
 
   <script>
-    const zoneData = {
+    const zoneManifest = {
       CLEAR: {
-        pill: 'ZONA BERSIH • KENDALI PENUH',
-        honesty: 'Masih ada di tanganmu. Jaga ritme hari ini.',
+        pillText: 'ZONA BERSIH • KENDALI PENUH',
+        pillIcon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
+        quote: 'Masih ada di tanganmu. Jaga ritme hari ini.',
         factors: [],
         smokeCount: 0,
-        smokeBadge: 'Bersih (0 btg)',
-        smokeSub: 'Target harian: 0 batang',
+        smokeTag: 'Bersih (0 btg)',
+        smokeContext: 'Target harian: 0 batang',
         pmoCount: 0,
-        pmoBadge: 'Bersih (0 sesi)',
-        sleepBadge: 'Tepat Waktu',
-        dotColor: '#54C98A'
+        pmoTag: 'Bersih (0 sesi)',
+        sleepTag: 'Tepat Waktu',
+        beaconColor: '#48C07E'
       },
       WARNING: {
-        pill: 'ZONA WASPADA • KOMPROMI',
-        honesty: 'Baru satu batang. Tapi kompromi selalu dimulai dari "cuma satu".',
-        factors: ['• Rokok: 1 batang'],
+        pillText: 'ZONA WASPADA • KOMPROMI',
+        pillIcon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+        quote: 'Baru satu batang. Tapi kompromi selalu dimulai dari "cuma satu".',
+        factors: ['Rokok: 1 batang'],
         smokeCount: 1,
-        smokeBadge: '1 btg tercatat',
-        smokeSub: 'Kompromi pertama hari ini',
+        smokeTag: '1 btg tercatat',
+        smokeContext: 'Kompromi pertama tercatat',
         pmoCount: 0,
-        pmoBadge: 'Bersih (0 sesi)',
-        sleepBadge: 'Tepat Waktu',
-        dotColor: '#E9AA40'
+        pmoTag: 'Bersih (0 sesi)',
+        sleepTag: 'Tepat Waktu',
+        beaconColor: '#E59824'
       },
       DANGER: {
-        pill: 'ZONA BAHAYA • HAMPIR JEBOL',
-        honesty: 'Sudah 3 batang. Alasan apa lagi yang kamu siapkan untuk batang berikutnya?',
-        factors: ['• Rokok: 3 batang', '• Pengeluaran bertambah'],
+        pillText: 'ZONA BAHAYA • HAMPIR JEBOL',
+        pillIcon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        quote: 'Sudah 3 batang. Alasan apa lagi yang kamu siapkan untuk batang berikutnya?',
+        factors: ['Rokok: 3 batang', 'Pengeluaran bertambah'],
         smokeCount: 3,
-        smokeBadge: '3 btg (bahaya)',
-        smokeSub: 'Mendekati zona kritis harian',
+        smokeTag: '3 btg (bahaya)',
+        smokeContext: 'Mendekati ambang kritis',
         pmoCount: 0,
-        pmoBadge: 'Bersih (0 sesi)',
-        sleepBadge: 'Tepat Waktu',
-        dotColor: '#E76B40'
+        pmoTag: 'Bersih (0 sesi)',
+        sleepTag: 'Tepat Waktu',
+        beaconColor: '#E55E2B'
       },
       CRITICAL: {
-        pill: 'ZONA KRITIS • TARGET GAGAL',
-        honesty: 'Bukan cuma satu, kamu melanggar beberapa target sekaligus. Ini bukan khilaf, ini kompromi sadar.',
-        factors: ['• Rokok: 4 batang', '• PMO: 1 sesi', '• Begadang 60m'],
+        pillText: 'ZONA KRITIS • TARGET GAGAL',
+        pillIcon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        quote: 'Bukan cuma satu, kamu melanggar beberapa target sekaligus. Ini bukan khilaf, ini kompromi sadar.',
+        factors: ['Rokok: 4 batang', 'PMO: 1 sesi', 'Begadang 60m'],
         smokeCount: 4,
-        smokeBadge: '4 btg (kritis)',
-        smokeSub: 'Target harian terlewati jauh',
+        smokeTag: '4 btg (kritis)',
+        smokeContext: 'Target terlewati jauh',
         pmoCount: 1,
-        pmoBadge: '1 sesi (kritis)',
-        sleepBadge: 'Lewat 60m',
-        dotColor: '#D83D52'
+        pmoTag: '1 sesi (kritis)',
+        sleepTag: 'Lewat 60m',
+        beaconColor: '#D62D44'
       }
     };
 
-    function setZone(zone) {
-      const frame = document.getElementById('phoneFrame');
-      frame.setAttribute('data-zone', zone);
+    function setZone(zoneName) {
+      const container = document.getElementById('phoneContainer');
+      container.setAttribute('data-zone', zoneName);
 
-      document.querySelectorAll('.zone-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-zone') === zone);
+      document.querySelectorAll('.zone-trigger').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-zone') === zoneName);
       });
 
-      const d = zoneData[zone];
-      document.getElementById('zonePill').textContent = d.pill;
-      document.getElementById('honestyText').textContent = `"${d.honesty}"`;
-      document.getElementById('smokeNum').textContent = d.smokeCount;
-      document.getElementById('smokeBadge').textContent = d.smokeBadge;
-      document.getElementById('smokeSub').textContent = d.smokeSub;
-      document.getElementById('pmoNum').textContent = d.pmoCount;
-      document.getElementById('pmoBadge').textContent = d.pmoBadge;
-      document.getElementById('sleepBadge').textContent = d.sleepBadge;
-      document.getElementById('liveDot').style.background = d.dotColor;
+      const data = zoneManifest[zoneName];
+      const pill = document.getElementById('zoneBadgeText');
+      pill.innerHTML = `${data.pillIcon} <span>${data.pillText}</span>`;
 
-      const factorTagsContainer = document.getElementById('factorTags');
-      factorTagsContainer.innerHTML = '';
-      d.factors.forEach(f => {
+      document.getElementById('bannerQuote').textContent = `"${data.quote}"`;
+      document.getElementById('smokeCountNum').textContent = data.smokeCount;
+      document.getElementById('detailSmokeNum').textContent = data.smokeCount;
+      document.getElementById('smokeSeverityTag').textContent = data.smokeTag;
+      document.getElementById('smokeContextText').textContent = data.smokeContext;
+      document.getElementById('pmoCountNum').textContent = data.pmoCount;
+      document.getElementById('detailPmoNum').textContent = data.pmoCount;
+      document.getElementById('pmoSeverityTag').textContent = data.pmoTag;
+      document.getElementById('sleepSeverityTag').textContent = data.sleepTag;
+      document.getElementById('beaconDot').style.background = data.beaconColor;
+
+      const factorContainer = document.getElementById('factorChips');
+      factorContainer.innerHTML = '';
+      data.factors.forEach(f => {
         const span = document.createElement('span');
-        span.className = 'factor-tag';
+        span.className = 'factor-chip-item';
         span.textContent = f;
-        factorTagsContainer.appendChild(span);
+        factorContainer.appendChild(span);
+      });
+
+      if (data.smokeCount > 0) {
+        document.getElementById('smokeLogHistoryText').textContent = `${data.smokeCount} batang rokok tercatat pada hari ini.`;
+      } else {
+        document.getElementById('smokeLogHistoryText').textContent = 'Belum ada batang rokok tercatat hari ini.';
+      }
+    }
+
+    function openScreen(screenId) {
+      document.querySelectorAll('.screen-pane').forEach(p => p.classList.remove('active'));
+      const targetPane = document.getElementById(`pane-${screenId}`);
+      if (targetPane) targetPane.classList.add('active');
+
+      document.querySelectorAll('.dock-tab').forEach(t => {
+        t.classList.toggle('active', t.getAttribute('onclick').includes(screenId));
       });
     }
 
-    function showScreen(screenId) {
-      document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
-      const activeScreen = document.getElementById(`view-${screenId}`);
-      if (activeScreen) activeScreen.classList.add('active');
-
-      document.querySelectorAll('.screen-tab-btn').forEach(b => {
-        b.classList.toggle('active', b.getAttribute('onclick').includes(screenId));
-      });
-    }
-
-    let smokeCount = 0;
-    function quickAddSmoke() {
-      smokeCount++;
-      if (smokeCount === 1) setZone('WARNING');
-      else if (smokeCount >= 2 && smokeCount <= 3) setZone('DANGER');
-      else if (smokeCount >= 4) setZone('CRITICAL');
+    let activeSmokeCount = 0;
+    function triggerAddSmoke() {
+      activeSmokeCount++;
+      if (activeSmokeCount === 1) setZone('WARNING');
+      else if (activeSmokeCount <= 3) setZone('DANGER');
+      else setZone('CRITICAL');
     }
 
     let isSleeping = false;
-    function toggleSleep() {
+    function toggleSleepState() {
       isSleeping = !isSleeping;
-      document.getElementById('sleepBtn').textContent = isSleeping ? 'Aku Bangun' : 'Mau Tidur';
-      document.getElementById('sleepSub').textContent = isSleeping ? 'Sedang tercatat tidur...' : 'Belum tidur malam ini';
+      document.getElementById('sleepStateLabel').textContent = isSleeping ? 'Aku Bangun' : 'Mau Tidur';
+      document.getElementById('sleepContextText').textContent = isSleeping ? 'Sedang mencatat jam tidur...' : 'Belum mencatat jam tidur';
+      document.getElementById('sleepSeverityTag').textContent = isSleeping ? 'Tidur Aktif' : 'Tepat Waktu';
     }
+
+    // Urge box breathing countdown simulation
+    let urgeSeconds = 90;
+    setInterval(() => {
+      const timerElem = document.getElementById('timerCount');
+      const phaseElem = document.getElementById('phaseText');
+      if (timerElem && phaseElem) {
+        urgeSeconds = urgeSeconds <= 1 ? 90 : urgeSeconds - 1;
+        timerElem.textContent = `${urgeSeconds}s`;
+        const cycle = (90 - urgeSeconds) % 14;
+        if (cycle < 4) phaseElem.textContent = 'Tarik Napas...';
+        else if (cycle < 8) phaseElem.textContent = 'Tahan...';
+        else if (cycle < 12) phaseElem.textContent = 'Hembuskan...';
+        else phaseElem.textContent = 'Tenang...';
+      }
+    }, 1000);
   </script>
 </body>
 </html>

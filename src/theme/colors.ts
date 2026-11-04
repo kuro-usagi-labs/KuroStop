@@ -1,63 +1,71 @@
 export const COLORS = {
-  // Light Canvas Foundations
+  // Ultra-refined Light Canvas Foundations (iOS System standard)
   background: '#F8FAF9',
+  canvasMuted: '#F2F6F4',
   surface: '#FFFFFF',
-  surfaceSubtle: '#F1F5F3',
-  surfaceActive: '#E9EFEF',
-  border: '#E2EAE5',
-  borderSubtle: '#EDF2EF',
-  borderStrong: '#CBD8D2',
+  surfaceSubtle: '#F4F7F5',
+  surfaceActive: '#EAEFEA',
+  surfaceGlass: 'rgba(255, 255, 255, 0.88)',
 
-  // Typography
-  textPrimary: '#18211E',
-  textSecondary: '#66746E',
-  textTertiary: '#9EABA4',
+  // Borders & Dividers (Hairline & Sub-pixel)
+  border: '#E3ECE7',
+  borderSubtle: '#EDF3F0',
+  borderStrong: '#CBD8D1',
+  borderFocus: '#18211E',
+
+  // Typography Scale Hierarchy
+  textPrimary: '#141C19',
+  textSecondary: '#5E6B65',
+  textTertiary: '#94A39B',
   textInverse: '#FFFFFF',
 
-  // Visual State: CLEAR (Mint / Rebirth)
+  // Visual State: CLEAR (Emerald Mint — Restrained, Calming, Pure)
   clear: {
-    primary: '#3BB273',
-    accent: '#54C98A',
-    surface: '#DDF6E8',
-    surfaceSubtle: '#F0FAF4',
+    primary: '#2E9F63',
+    accent: '#47BE7D',
+    deep: '#1D6E43',
+    surface: '#E8F7EE',
+    surfaceSubtle: '#F3FBF6',
     border: '#BFE7D0',
-    glow: 'rgba(84, 201, 138, 0.35)',
+    glow: 'rgba(71, 190, 125, 0.28)',
   },
 
-  // Visual State: WARNING (Amber / Hesitation)
+  // Visual State: WARNING (Warm Amber — Hesitation & Vigilance)
   warning: {
-    primary: '#D9911C',
-    accent: '#E9AA40',
-    surface: '#FDF5E6',
+    primary: '#C97D10',
+    accent: '#E59B28',
+    deep: '#8A5205',
+    surface: '#FDF6E8',
     surfaceSubtle: '#FEFAF2',
-    border: '#F6DAB0',
-    glow: 'rgba(233, 170, 64, 0.40)',
+    border: '#F4D8A6',
+    glow: 'rgba(229, 155, 40, 0.32)',
   },
 
-  // Visual State: DANGER (Orange / Escalation)
+  // Visual State: DANGER (Fiery Coral — Active Escalation & Tension)
   danger: {
-    primary: '#D95325',
-    accent: '#E76B40',
+    primary: '#D34A1B',
+    accent: '#E35F2F',
+    deep: '#942D08',
     surface: '#FDF1EB',
     surfaceSubtle: '#FEF8F5',
-    border: '#F9C8B5',
-    glow: 'rgba(231, 107, 64, 0.45)',
+    border: '#F8C5B0',
+    glow: 'rgba(227, 95, 47, 0.38)',
   },
 
-  // Visual State: CRITICAL (Visceral Crimson / Decay)
+  // Visual State: CRITICAL (Visceral Crimson — Disruption & System Failure)
   critical: {
-    primary: '#C4283D',
-    accent: '#D83D52',
-    deep: '#922539',
+    primary: '#BA2035',
+    accent: '#D32F45',
+    deep: '#841B2B',
     surface: '#FDEEF0',
     surfaceSubtle: '#FEF7F8',
-    border: '#F5B8C0',
-    glow: 'rgba(216, 61, 82, 0.55)',
+    border: '#F4B5BD',
+    glow: 'rgba(211, 47, 69, 0.45)',
   },
 
-  // Overlay & Shadows
-  overlay: 'rgba(24, 33, 30, 0.45)',
-  shadow: '#0D1A14',
+  // Overlays & Scrims
+  overlay: 'rgba(20, 28, 25, 0.52)',
+  shadow: '#0B1410',
 };
 
 export type ThemeColors = typeof COLORS;
