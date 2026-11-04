@@ -1,10 +1,11 @@
-name: KuroStop CI & iOS Build Pipeline
+name: KuroStop CI & iOS IPA Builder
 
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   validate-and-test:
@@ -29,11 +30,12 @@ jobs:
       - name: Execute automated unit test suite
         run: npm test
 
-  ios-eas-build:
-    name: iOS EAS Internal Build (Optional)
+  build-ios-ipa:
+    name: Build iOS IPA Package
     needs: validate-and-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: macos-14
+    timeout-minutes: 60
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -44,17 +46,42 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Setup Expo CLI & EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Install dependencies
+      - name: Install project dependencies
         run: npm ci
 
-      - name: Trigger EAS iOS Simulator Build
-        if: env.EXPO_TOKEN != ''
-        run: eas build --platform ios --profile development --non-interactive
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      - name: Generate native iOS project (Expo Prebuild)
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install
+          cd ..
+
+      - name: Archive iOS Release
+        run: |
+          xcodebuild -workspace ios/kurostop.xcworkspace \
+            -scheme kurostop \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/KuroStop.xcarchive \
+            archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+      - name: Package into IPA
+        run: |
+          mkdir -p build/Payload
+          cp -R build/KuroStop.xcarchive/Products/Applications/*.app build/Payload/
+          cd build
+          zip -qry KuroStop.ipa Payload
+          cd ..
+          ls -lh build/KuroStop.ipa
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KuroStop-iOS-IPA
+          path: build/KuroStop.ipa
+          retention-days: 14
