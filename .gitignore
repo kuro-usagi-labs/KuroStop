@@ -1,5 +1,3 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
 # dependencies
 node_modules/
 
@@ -35,6 +33,18 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# SQLite databases & backups
+*.db
+*.db-wal
+*.db-shm
+kurostop-backup-*.json
+
+# iOS build artifacts
+build/
+*.ipa
+*.ipa.sha256
+*.xcarchive
 
 # generated native folders
 /ios

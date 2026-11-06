@@ -1,0 +1,128 @@
+name: Build Unsigned iOS Release IPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_configuration:
+        description: 'Build Configuration'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-unsigned-ipa:
+    name: Build Unsigned Release IPA
+    runs-on: macos-26
+    timeout-minutes: 60
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Set up Node.js 22 (Expo SDK 58 requirement)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: 3. Install Locked Dependencies
+        run: |
+          npm ci
+
+      - name: 4. Static Validation (TypeScript & Tests)
+        run: |
+          npx tsc --noEmit
+          npm test
+
+      - name: 5. Environment Diagnostics & Xcode Selection
+        run: |
+          echo "=== System Version ==="
+          sw_vers
+          echo "=== Node.js Version ==="
+          node --version
+          echo "=== Available Xcode Installations ==="
+          ls -d /Applications/Xcode* || true
+          XCODE_PATH=$(xcode-select -p)
+          echo "Active Developer Directory: $XCODE_PATH"
+          echo "=== Xcode Version ==="
+          xcodebuild -version
+          echo "=== Available SDKs ==="
+          xcodebuild -showsdks
+
+      - name: 6. Validate Expo Configuration & Native Plugins
+        run: |
+          npx expo config --type public
+
+      - name: 7. Expo Prebuild iOS Project
+        run: |
+          npx expo prebuild --platform ios --clean
+
+      - name: 8. Install CocoaPods Dependencies
+        working-directory: ios
+        run: |
+          pod install
+
+      - name: 9. Compile & Archive iOS Release App (Unsigned)
+        run: |
+          mkdir -p build
+          xcodebuild -workspace ios/KuroStop.xcworkspace \
+            -scheme KuroStop \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/KuroStop.xcarchive \
+            archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
+
+      - name: 10. Package Unsigned IPA Archive
+        working-directory: build
+        run: |
+          mkdir -p Payload
+          cp -R KuroStop.xcarchive/Products/Applications/KuroStop.app Payload/
+          zip -r -y KuroStop-unsigned.ipa Payload
+          shasum -a 256 KuroStop-unsigned.ipa > KuroStop-unsigned.ipa.sha256
+          echo "Generated IPA Checksum:"
+          cat KuroStop-unsigned.ipa.sha256
+
+      - name: 11. Validate IPA Structure & Binary Architecture
+        working-directory: build
+        run: |
+          test -f KuroStop-unsigned.ipa || (echo "Error: IPA file missing!" && exit 1)
+          
+          # Inspect zip structure
+          unzip -l KuroStop-unsigned.ipa > ipa_contents.txt
+          grep "Payload/KuroStop.app/Info.plist" ipa_contents.txt || (echo "Error: Info.plist missing from IPA!" && exit 1)
+          grep "Payload/KuroStop.app/KuroStop" ipa_contents.txt || (echo "Error: Executable binary missing from IPA!" && exit 1)
+          
+          # Inspect binary architectures
+          otool -vh Payload/KuroStop.app/KuroStop || file Payload/KuroStop.app/KuroStop
+          
+          # Verify no embedded provisioning profile (clean unsigned package)
+          if [ -f Payload/KuroStop.app/embedded.mobileprovision ]; then
+            echo "Warning: embedded.mobileprovision found in unsigned build"
+          else
+            echo "Confirmed: No provisioning profile embedded. Clean unsigned artifact ready for sideloading."
+          fi
+
+      - name: 12. Upload Unsigned IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KuroStop-Unsigned-IPA
+          path: |
+            build/KuroStop-unsigned.ipa
+            build/KuroStop-unsigned.ipa.sha256
+          retention-days: 14
+          if-no-files-found: error

@@ -1,67 +1,105 @@
-# DECISIONS.md — KuroStop Architectural & Design Decision Records
+# Architectural Decisions (ADR)
 
-## ADR 001: Visual Direction Selection — Direction A ("White Corruption")
-* **Date:** 2026-11-05
-* **Context:**
-  Huashu Design guidelines require creating and evaluating three distinct visual directions:
-  - **Direction A: White Corruption** (Pristine light canvas `#F8FAF9`, mint-green breathing orb, organic visual decay via chromatic aberration, amber fracture borders, and deep crimson ambient tension).
-  - **Direction B: Clinical Threat** (Sterile medical monitor, monospaced tabular layouts, cold monochrome grid, surgical diagnostic alerts).
-  - **Direction C: Minimal Editorial Discipline** (Swiss typography, extreme scale contrasts, stark monochrome rules, editorial text treatments).
-* **Evaluation Matrix:**
-  | Metric | Direction A (White Corruption) | Direction B (Clinical Threat) | Direction C (Minimal Editorial) |
-  |---|---|---|---|
-  | Emotional Consequence | 10/10 (Living, immediate visceral feedback) | 8/10 (Cold, diagnostic) | 7/10 (Intellectual, detached) |
-  | Readability & Hierarchy | 9/10 (Strict typography with soft layers) | 8/10 (Dense data tables) | 9/10 (High readability) |
-  | iOS HIG Conformance | 9.5/10 (System font, native sheets, standard tabs) | 7.5/10 (Too non-standard/dense) | 8.5/10 (Clean, but sterile) |
-  | Motion Potential | 10/10 (Dynamic morphing orb, organic pulse) | 6/10 (Flickering dials) | 5/10 (Subtle line slides) |
-  | Light-Theme Fulfillment | 10/10 (Designed specifically for light canvas decay) | 8.5/10 (Sterile white) | 9/10 (Paper white) |
-* **Decision:** Direction A ("White Corruption") is selected as the primary visual production architecture. It delivers the intimate, intimidating consequence model requested by the user without sacrificing Apple's design purity.
+## ADR-001: Local-First Persistence with Expo SQLite
 
----
+- **Status**: Accepted
+- **Context**: KuroStop requires offline-first, private, local persistence for a single user without server dependencies or telemetry.
+- **Decision**: Adopt `expo-sqlite` with asynchronous modern API (`openDatabaseAsync`, `execAsync`, `getAllAsync`, `runAsync`, `withTransactionAsync`).
+- **Consequences**:
+  - Full relational integrity with foreign keys and WAL mode.
+  - Zero cloud lock-in.
+  - Complete data privacy.
 
-## ADR 002: Deterministic Consequence Scoring Engine
-* **Date:** 2026-11-05
-* **Context:**
-  The visual zone must not transition arbitrarily or based on unscientific scoring formulas. Transitions must be deterministic, transparent, and configurable per habit.
-* **Decision:**
-  - Define `calculateDailyZone(events, goals, sleepRecord, thresholds)`.
-  - Severity points are assigned:
-    - Smoking: 0 = Clear, 1 = Warning (+25 pts), 2-3 = Danger (+50 pts), 4+ = Critical (+75 pts).
-    - PMO: 0 = Clear, 1 = Warning (+35 pts), 2+ = Critical (+80 pts).
-    - Sleep lateness: 0-15 min = Clear, 16-45 min = Warning (+20 pts), 46-90 min = Danger (+45 pts), >90 min = Critical (+75 pts).
-  - Zone thresholds:
-    - Score 0: `CLEAR`
-    - Score 1 - 39: `WARNING`
-    - Score 40 - 74: `DANGER`
-    - Score 75+: `CRITICAL`
-  - Any single critical violation (e.g., >3 cigarettes or multiple PMO episodes) immediately pulls the environment into DANGER or CRITICAL.
-  - Zero recorded events on a day shows an "unverified fresh" state rather than a falsely certified win until the day concludes or the user logs their status.
+## ADR-002: Integer Rupiah (IDR) Financial Math
 
----
+- **Status**: Accepted
+- **Context**: JavaScript floating-point arithmetic (`0.1 + 0.2 = 0.30000000000000004`) causes subtle rounding errors in currency calculations.
+- **Decision**: All financial amounts in the database and calculations are stored and processed strictly as integer IDR. Formatting with thousands separators is applied only at the display boundary.
+- **Consequences**:
+  - Deterministic balance and savings calculations.
+  - No rounding drift over multiple transactions.
 
-## ADR 003: Financial Calculations & Integer Currency
-* **Date:** 2026-11-05
-* **Context:**
-  Floating point math can introduce rounding errors in currency calculations. Cigarette pack and stick prices in Indonesia fluctuate (e.g. Rp 28.000 today, Rp 17.000 for a different brand tomorrow).
-* **Decision:**
-  - All financial amounts are stored as integer Indonesian Rupiah (`IDR`).
-  - Distinguish explicitly between:
-    - `actualSpending = sum(valid cigarette purchase totals)`
-    - `baselineExpectedSpending = dailyBaselineRate * trackedDayCount`
-    - `avoidedSpending = baselineExpectedSpending - actualSpending` (may be negative if user outspends their baseline).
-  - Honest copy: Label avoided spending as "Perkiraan pengeluaran yang dihindari" (Estimated avoided spending), never cash in hand.
+## ADR-003: Pure Function Consequence Engine
 
----
+- **Status**: Accepted
+- **Context**: The consequence zone (*Bersih*, *Awas*, *Bahaya*, *Kritis*) must be reliably reproducible and testable without UI dependencies.
+- **Decision**: Implement `calculateDailyZone` as a pure function accepting typed events, user targets, thresholds, and boundary hours, returning zone classification, severity scores, and triggering factors.
+- **Consequences**:
+  - 100% testable with automated unit tests across all edge cases.
+  - Consistent across app restarts and date shifts.
 
-## ADR 004: Local SQLite Persistence with Explicit Migrations
-* **Date:** 2026-11-05
-* **Context:**
-  The app is private and offline-first. Habit records, purchases, and settings must survive restarts, app termination, and system updates.
-* **Decision:**
-  - Use `expo-sqlite` with explicit SQL migrations.
-  - Tables:
-    - `events`: Individual habit events (smoking, pmo, sleep markers) with UUID, timestamp, local date string (`YYYY-MM-DD`), type, count, note, trigger tag.
-    - `purchases`: Cigarette pack/stick purchases with UUID, timestamp, local date, quantity, total price (integer IDR), brand/note.
-    - `sleep_sessions`: Bedtime sessions crossing midnight, associated with the originating sleep night date (`YYYY-MM-DD`), target bedtime, actual sleep time, wake time, and lateness minutes.
-    - `user_settings`: Baseline spending, targets, accountability level (`normal` | `strict` | `brutal`), bedtime string (`HH:mm`), reduce motion flag.
-    - `urge_logs`: Urge events ("Gue Lagi Pengen..."), habit type, resisted (boolean), duration seconds, trigger tag.
+## ADR-004: Strict Verification vs Empty Days
+
+- **Status**: Accepted
+- **Context**: An empty event list does not prove the user abstained; they may simply have forgotten to log.
+- **Decision**: A day is verified only if:
+  - Events were logged within target limits, OR
+  - An explicit check-in was recorded for that day (`daily_checkins`).
+  Unverified days do not extend an abstinence streak.
+- **Consequences**:
+  - True accountability.
+  - Honest streak tracking.
+
+## ADR-005: Sleep Cross-Midnight Attribution
+
+- **Status**: Accepted
+- **Context**: Sleep sessions frequently begin before or after midnight (e.g., 00:45) and end the next morning (07:15).
+- **Decision**: Sleep sessions store an explicit `night_day_key` calculated based on the day boundary (04:00 AM Asia/Jakarta). A sleep session starting at 00:45 on Nov 7 belongs to the evening of Nov 6.
+- **Consequences**:
+  - Lateness is calculated accurately relative to the night's bedtime target.
+  - Daily sleep stats correctly reflect the night of rest, not the wake-up date alone.
+
+## ADR-006: Optimistic UI Updates with Rollback Safety
+
+- **Status**: Accepted
+- **Context**: Offline mobile UX requires instant feedback without UI stutter, but unhandled asynchronous writes lead to dirty UI states if the database transaction fails.
+- **Decision**: All store mutations (`add`, `update`, `remove`, `restore`, `setSettings`) return Promises, perform an immediate optimistic state dispatch, await the SQLite transaction, and automatically rollback the UI state if the write fails.
+- **Consequences**:
+  - Instantaneous UI response feel with 60fps animations.
+  - Reliable data consistency: no unsaved ghost records lingering in the UI.
+
+## ADR-007: Production Data Isolation from Demo Operations
+
+- **Status**: Accepted
+- **Context**: During prototyping and testing, demo reset utilities can mistakenly wipe real user records if sharing the same code paths or tables.
+- **Decision**: Introduce explicit demo isolation mode (`isDemoMode`). Calling `resetDemo()` in production mode is blocked by a guard and will never execute destructive SQL on live tables. Onboarding defaults `withDemo` to `false`.
+- **Consequences**:
+  - Real user data is protected against accidental wiping.
+  - Clean separation between evaluation datasets and authentic discipline logging.
+
+## ADR-008: Native Biometric Authentication with Fallback
+
+- **Status**: Accepted
+- **Context**: KuroStop contains sensitive personal records requiring on-device authentication without exposing the user to permanent lockout.
+- **Decision**: Implement `expo-local-authentication` supporting Face ID, Touch ID, and OS-managed passcode fallback. Toggling `appLock` requires successful biometric verification before enabling.
+- **Consequences**:
+  - Hardened local access control.
+  - No risk of permanent lockout when biometrics temporarily fail or lighting is poor.
+
+## ADR-009: App Switcher Multitasking Shield for Sensitive Records
+
+- **Status**: Accepted
+- **Context**: iOS automatically snapshots the active window when multitasking, displaying personal habit data in the app switcher carousel.
+- **Decision**: Render an opaque privacy shield overlay on `inactive` and `background` AppState events to prevent sensitive screen contents from leaking into iOS task-switcher previews.
+- **Consequences**:
+  - Habit marks and records remain hidden from casual onlookers.
+  - Zero leakage in multitasking snapshots.
+
+## ADR-010: Offline Transactional JSON Backup with Checksum
+
+- **Status**: Accepted
+- **Context**: Private sideload updates and certificate refreshes risk database eviction if an app is reinstalled or the bundle identifier changes.
+- **Decision**: Implement a versioned `KuroStopBackupV1` format with FNV-1a checksum and atomic transactional restore via `db.withTransactionAsync`.
+- **Consequences**:
+  - Portable offline backup independent of iOS cloud syncing.
+  - Failed restorations automatically rollback, guaranteeing zero data corruption.
+
+## ADR-011: Unsigned iOS Release IPA CI Pipeline for Sideloading
+
+- **Status**: Accepted
+- **Context**: The user requires a standalone iOS Release IPA for personal sideloading without storing sensitive Apple Developer credentials or distribution certificates in GitHub Actions.
+- **Decision**: Configure GitHub Actions on a macOS-14 runner to prebuild Expo, install CocoaPods, build an unsigned Xcode Release archive (`CODE_SIGNING_ALLOWED=NO`), and package a valid `Payload/KuroStop.app` IPA artifact.
+- **Consequences**:
+  - Zero credential exposure in CI.
+  - Reproducible, automated iOS Release artifact generation.
+  - Sideload signing is performed by the user's local utility during physical installation.

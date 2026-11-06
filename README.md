@@ -1,176 +1,72 @@
 # KuroStop — Every Choice Leaves a Mark
 
-> **A premium, personal-use iOS discipline system for quitting cigarettes, PMO, and late-night scrolling.**  
-> *Bahasa Indonesia-first • Offline-first • Private • Light-Theme Consequence Engine*
+**KuroStop** adalah aplikasi disiplin pribadi berarsitektur *offline-first* untuk iOS (iPhone), dirancang khusus untuk membantu pengguna menghentikan kebiasaan merokok, mengelola dorongan pornografi dan masturbasi (PMO), serta mendisiplinkan jam tidur malam melalui sistem konsekuensi visual deterministik bernama **"Lembar" (Porcelain Paper & Sumi Ink)**.
 
 ---
 
-## 1. Product Philosophy & Identity
+## 🌟 Pilar Utama Aplikasi
 
-KuroStop is **not** a generic habit tracker, gamified motivational app, or fitness counter.
+1. **Local-First & Privasi Mutlak**:
+   - Seluruh data aktivitas disimpan secara lokal di perangkat iPhone menggunakan database relasional **SQLite (WAL Mode)**.
+   - Tanpa server backend, tanpa registrasi akun, tanpa cloud sync, dan **nol telemetri / pelacak pihak ketiga**.
 
-It is built on a single core axiom:
+2. **Identitas Visual "Lembar"**:
+   - Tema *premium light* terinspirasi dari kertas porselen (`#F2F3F0`) dan tinta sumi.
+   - Kartu konsekuensi harian (*DaySheet*) dengan 4 zona deterministik: *Bersih*, *Awas*, *Bahaya*, dan *Kritis*.
+   - Transisi pegas responsif menggunakan React Native Reanimated dan umpan balik haptic iOS.
 
-**YOUR ACTIONS VISIBLY CHANGE YOUR ENVIRONMENT.**
+3. **Keamanan & Fitur Native iOS**:
+   - **Kunci Biometrik (Face ID / Touch ID)** dengan fallback kode sandi perangkat via `expo-local-authentication`.
+   - **App Switcher Privacy Shield**: Perlindungan otomatis layar multitasking dari intipan orang lain.
+   - **Penyelubungan PMO (`pmoCover`)**: Masking rincian sensitif pada kartu ringkasan harian.
+   - **Notifikasi Lokal**: Pengingat waktu tidur, check-in lembar malam, dan evaluasi mingguan via `expo-notifications`.
 
-Every recorded action has an immediate visual consequence inside the application. When you remain disciplined, KuroStop presents a pristine, mint-tinted light canvas with a calm, breathing organic orb. The more you violate your personal targets, the more intimidating and corrupted the interface becomes:
+4. **Cadangan & Pemulihan Mandiri (Offline Backup)**:
+   - Ekspor seluruh basis data ke berkas JSON terstruktur dengan verifikasi checksum FNV-1a.
+   - Pemulihan transaksional atomik dengan proteksi *rollback* otomatis jika integritas berkas gagal.
 
-1. **CLEAR (Zona Bersih)**: Light background (`#F8FAF9`), gentle mint atmosphere (`#54C98A`), calm 3.5s breathing orb, soothing haptic feedback.
-2. **WARNING (Zona Waspada)**: Soft amber transition (`#E9AA40`), tighter pulse, warning ring around violated habits.
-3. **DANGER (Zona Bahaya)**: Orange flares (`#E76B40`), asymmetrical tension pulse, atmospheric edge tension.
-4. **CRITICAL (Zona Kritis)**: Visceral deep-red tension (`#D83D52` / `#922539`), heavy tension pulse, screen-edge fracture vignette, direct harsh accountability messages.
-
-At the next local calendar midnight boundary, the visual environment resets fresh and clean, while all underlying historical records remain stored permanently.
-
----
-
-## 2. Core Habit Modules
-
-### A. Merokok & Pengeluaran Rokok (Smoking)
-- Quick log: `+1 Batang`, custom count stepper, personal triggers, and notes.
-- Dedicated purchase tracker: Packs (`bungkus`) vs Sticks (`ketengan`), price presets (Rp 20.000, Rp 25.000, Rp 28.000, Rp 35.000, Rp 42.000) or custom price.
-- Honest separation between *buying* cigarettes and *smoking* them.
-
-### B. Pornografi & Masturbasi (PMO)
-- Tracks individual event types: Pornografi Saja, Masturbasi Saja, or Sesi Lengkap (PMO).
-- Prevents double-counting combined sessions.
-- Private, direct Indonesian terminology.
-- Personal trigger logging: Sendirian di Kamar, Larut Malam, Media Sosial, Kelelahan, Bosan.
-
-### C. Tidur & Begadang (Sleep)
-- Target bedtime (e.g. `23:00`) and target wake time (e.g. `06:00`).
-- Simple manual actions: *"Aku Mau Tidur"* & *"Aku Sudah Bangun"*.
-- Calculates lateness minutes past bedtime. Provisional warning if active on phone after target bedtime.
-- Night sessions crossing midnight correctly belong to the originating sleep night date.
+5. **Distribusi Sideloading Mandiri & CI/CD**:
+   - Alur kerja otomatis **GitHub Actions** (`.github/workflows/build-ios-unsigned.yml`) pada runner `macos-26` untuk memproduksi berkas **Release IPA Unsigned**.
+   - Siap dipasang ke iPhone fisik menggunakan Sideloadly, AltStore, atau SideStore tanpa mengekspos sertifikat Apple Developer di CI.
 
 ---
 
-## 3. Kalkulator Keuangan Rokok (Financial Engine)
+## 🚀 Perintah Pengembangan & Pengujian
 
-All calculations strictly use **integer Indonesian Rupiah (IDR)** to eliminate IEEE-754 floating-point inaccuracies.
-
-- **Actual Spending**: $\text{actualSpending} = \sum(\text{valid purchase totals})$
-- **Baseline Spending**: $\text{baselineExpected} = \text{dailyBaselineRate} \times \text{trackedDaysCount}$
-- **Avoided Spending (Penghematan yang Dihindari)**:
-  $$\text{avoidedSpending} = \text{baselineExpected} - \text{actualSpending}$$
-  - Accurately supports **negative values** if the user overspends their baseline.
-  - Honestly labeled as *"Perkiraan pengeluaran yang dihindari"*, never fake cash-in-hand.
-- Monthly breakdown reports and 1-year projections.
-
----
-
-## 4. Brutal Honesty Engine
-
-Configurable accountability intensity:
-- **Normal**: Netral & objektif berbasis angka.
-- **Strict**: Tegas & berfokus pada komitmen.
-- **Brutal (Default)**: Menghadapkanmu langsung pada kenyataan keputusanmu tanpa kompromi.
-
----
-
-## 5. Interupsi Dorongan ("Gue Lagi Pengen...")
-
-A distraction-free, 1-tap interruption modal:
-- Choose habit: Rokok, PMO, or Begadang.
-- **90-Second Guided Breathing**: Box breathing animation (Tarik Napas 4s, Tahan 4s, Hembuskan 4s, Tenang 2s).
-- **5-Minute Delay Challenge**: Scientific delay timer allowing impulsive dopamine spikes to subside.
-- **"Aku Berhasil Menahan"**: Logs a resisted urge victory.
-- **"Aku Khilaf (Catat)"**: Logs the event honestly.
-
----
-
-## 6. Architecture & Tech Stack
-
-- **Framework**: Expo SDK 58 / React Native 0.88
-- **Language**: TypeScript (strict mode, zero errors)
-- **State Management**: Zustand
-- **Local Database**: Expo SQLite with indexed SQL tables
-- **Motion & Physics**: React Native Reanimated & Gesture Handler
-- **Haptics**: Expo Haptics
-- **Testing**: Jest & ts-jest (22 unit tests passing)
-
-```text
-KuroStop/
-├── src/
-│   ├── animations/          # LivingOrb, AtmosphereDecay
-│   ├── components/
-│   │   ├── common/          # Button, Card, Header, Badge, Stepper
-│   │   ├── dashboard/       # HeroOrbSection, HabitSummaryCard, QuickActionsRow
-│   │   └── modals/          # QuickLogModal, BuyCigarettesModal, UrgeInterruptionModal
-│   ├── database/            # schema.ts, database.ts
-│   ├── features/
-│   │   ├── consequences/    # engine.ts, honestyEngine.ts & tests
-│   │   └── finance/         # calculator.ts & tests
-│   ├── screens/             # Onboarding, Dashboard, Details, Wallet, History, Settings
-│   ├── stores/              # useKuroStore.ts
-│   ├── theme/               # colors.ts, typography.ts, spacing.ts, tokens.ts
-│   ├── types/               # index.ts
-│   └── utils/               # date.ts, currency.ts & tests
-├── docs/
-│   ├── ARCHITECTURE.md      # Full architecture & state machine diagrams
-│   ├── DECISIONS.md         # ADRs (Visual direction, Scoring, Finance)
-│   ├── PROGRESS.md          # Implementation progress tracking
-│   ├── DESIGN_AUDIT.md      # Apple HIG & Huashu Design verification
-│   └── SKILL_VERIFICATION.md # Phase 0 four-repository audit
-├── .github/workflows/       # GitHub Actions CI pipeline
-├── app.json                 # iOS bundle & config
-├── eas.json                 # Expo EAS build configuration
-└── package.json
-```
-
----
-
-## 7. Local Development & Testing
-
-### Prerequisites
-- Node.js >= 20.x
-- npm >= 10.x
-- Expo Go app on iPhone (for wireless preview) OR macOS with Xcode (for local simulator)
-
-### Commands
+### 1. Menjalankan Server Pengembangan
 ```bash
-# 1. Install dependencies
 npm install
+npx expo start --ios
+```
 
-# 2. Run TypeScript type-check
-npx tsc --noEmit
-
-# 3. Run automated Jest tests
+### 2. Menjalankan Rangkaian Uji Otomatis (67 Tests)
+```bash
 npm test
+```
 
-# 4. Start Expo development server
-npx expo start
+### 3. Pemeriksaan Tipe TypeScript
+```bash
+npx tsc --noEmit
+```
+
+### 4. Pemeriksaan Linting
+```bash
+npm run lint
 ```
 
 ---
 
-## 8. iOS Build & Apple Signing Instructions
+## 📚 Indeks Dokumentasi Teknis
 
-KuroStop is configured for internal ad-hoc distribution via **Expo Application Services (EAS Build)**.
-
-### A. Prerequisites for Building an iOS IPA
-1. An Apple Developer Account (Individual or Organization) at [developer.apple.com](https://developer.apple.com).
-2. Registered iPhone UDID (for ad-hoc provisioning) or TestFlight access.
-3. An Expo account at [expo.dev](https://expo.dev).
-
-### B. EAS Build Steps
-```bash
-# 1. Install EAS CLI globally
-npm install -g eas-cli
-
-# 2. Login to your Expo account
-eas login
-
-# 3. Configure iOS project credentials
-eas build:configure
-
-# 4. Build an iOS Simulator binary (no Apple developer account required)
-eas build --platform ios --profile development
-
-# 5. Build an Ad-Hoc IPA for physical iPhone installation
-eas build --platform ios --profile preview
-```
-
-### C. Installing on Physical iPhone Without App Store
-- Once the `preview` build finishes on EAS servers, scan the generated QR code or download the signed `.ipa` file.
-- Install directly via Apple Configurator, Sideloadly, or the EAS install page on Safari.
+- [PHASE5_RELEASE_AUDIT.md](docs/PHASE5_RELEASE_AUDIT.md): Laporan audit rilis Phase 5 & verifikasi CI/CD.
+- [REPOSITORY_MIGRATION.md](docs/REPOSITORY_MIGRATION.md): Dokumentasi migrasi dan pergantian repositori dari legacy ke Lembar.
+- [IOS_DEVICE_TESTS.md](docs/IOS_DEVICE_TESTS.md): Matriks verifikasi runtime perangkat iOS & batasan perangkat keras fisik.
+- [PHASE4_AUDIT.md](docs/PHASE4_AUDIT.md): Laporan audit & implementasi Fase 4.
+- [IOS_NATIVE_FEATURES.md](docs/IOS_NATIVE_FEATURES.md): Panduan fitur native iOS, biometrik, dan privasi.
+- [BACKUP_RESTORE.md](docs/BACKUP_RESTORE.md): Spesifikasi format cadangan dan pemulihan data.
+- [GITHUB_ACTIONS_BUILD.md](docs/GITHUB_ACTIONS_BUILD.md): Dokumentasi alur kerja kompilasi IPA unsigned (`macos-26`).
+- [SIDELOAD_GUIDE.md](docs/SIDELOAD_GUIDE.md): Panduan instalasi sideload via Sideloadly & AltStore.
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md): Arsitektur berlapis local-first KuroStop.
+- [DECISIONS.md](docs/DECISIONS.md): Catatan keputusan arsitektural (ADR-001 hingga ADR-011).
+- [BUSINESS_RULES.md](docs/BUSINESS_RULES.md): Formula matematika konsekuensi, finansial integer IDR, dan streak.
+- [DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md): Skema lengkap 8 tabel SQLite.
