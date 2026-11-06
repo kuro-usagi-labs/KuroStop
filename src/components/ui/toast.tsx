@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 12,
     paddingHorizontal: 14,
-    borderRadius: radius.card,
+    borderRadius: radius.lg,
     backgroundColor: color.ink,
     ...shadow.float,
   },
