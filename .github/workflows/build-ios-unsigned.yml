@@ -39,7 +39,7 @@ jobs:
         run: |
           npm ci
 
-      - name: 4. Static Validation (TypeScript & Tests)
+      - name: 4. Static Validation (TypeScript, Tests, Lint)
         run: |
           npx tsc --noEmit
           npm test
@@ -72,7 +72,86 @@ jobs:
         run: |
           pod install
 
-      - name: 9. Compile & Archive iOS Release App (Unsigned)
+      - name: 9. iOS Simulator Release Startup Smoke Test
+        run: |
+          echo "=== Step 9.1: Compiling Release App for iOS Simulator ==="
+          mkdir -p build_sim
+          xcodebuild -workspace ios/KuroStop.xcworkspace \
+            -scheme KuroStop \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath build_sim \
+            build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+          SIM_APP=$(find build_sim -name "KuroStop.app" -type d | head -n 1)
+          echo "Built Simulator App: $SIM_APP"
+          test -d "$SIM_APP" || (echo "Error: Simulator app binary not found!" && exit 1)
+
+          echo "=== Step 9.2: Selecting and Booting iPhone Simulator ==="
+          xcrun simctl list devices available
+          SIM_UDID=$(xcrun simctl list devices available | grep -E "iPhone (16|15|14)" | head -n 1 | grep -o -E "[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}" | head -n 1)
+          if [ -z "$SIM_UDID" ]; then
+            SIM_UDID=$(xcrun simctl list devices available | grep "iPhone" | head -n 1 | grep -o -E "[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}" | head -n 1)
+          fi
+          echo "Selected Simulator UDID: $SIM_UDID"
+
+          xcrun simctl boot "$SIM_UDID" || true
+          xcrun simctl bootstatus "$SIM_UDID" -b
+
+          echo "=== Step 9.3: Installing Release App on Simulator ==="
+          xcrun simctl install "$SIM_UDID" "$SIM_APP"
+
+          echo "=== Step 9.4: Launching App & Verifying Process Liveness ==="
+          mkdir -p build_sim/diagnostics build_sim/screenshots
+          xcrun simctl spawn "$SIM_UDID" log stream --predicate 'process == "KuroStop"' > build_sim/diagnostics/kurostop_console.log 2>&1 &
+          LOG_PID=$!
+
+          xcrun simctl launch "$SIM_UDID" com.kurostop.personal
+
+          # Allow cold launch, database migration, and root UI render
+          sleep 10
+
+          echo "=== Step 9.5: Capturing Verification Screenshot ==="
+          xcrun simctl io "$SIM_UDID" screenshot build_sim/screenshots/startup_verified.png
+
+          echo "=== Step 9.6: Checking Runtime Process Liveness ==="
+          APP_PID=$(xcrun simctl spawn "$SIM_UDID" launchctl list | grep "com.kurostop.personal" | awk '{print $1}' || true)
+          echo "App PID in simulator: $APP_PID"
+
+          # Check for native crash reports
+          CRASH_LOGS=$(find ~/Library/Logs/DiagnosticReports -name "*KuroStop*" 2>/dev/null || true)
+          if [ -n "$CRASH_LOGS" ]; then
+            echo "Warning: Native crash logs detected:"
+            cp $CRASH_LOGS build_sim/diagnostics/ || true
+            cat $CRASH_LOGS
+          fi
+
+          kill $LOG_PID 2>/dev/null || true
+
+          if [ -z "$APP_PID" ] || [ "$APP_PID" = "-" ]; then
+            echo "CRITICAL FAILURE: KuroStop process terminated on startup in Release simulator!"
+            exit 1
+          fi
+
+          echo "SUCCESS: KuroStop is actively running on iOS Simulator (PID: $APP_PID). Startup smoke test PASSED."
+          xcrun simctl terminate "$SIM_UDID" com.kurostop.personal || true
+          xcrun simctl shutdown "$SIM_UDID" || true
+
+      - name: 10. Upload Simulator Smoke Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: KuroStop-Simulator-SmokeTest
+          path: |
+            build_sim/screenshots/
+            build_sim/diagnostics/
+          retention-days: 14
+
+      - name: 11. Compile & Archive iOS Release App for Physical Devices (Unsigned)
         run: |
           mkdir -p build
           xcodebuild -workspace ios/KuroStop.xcworkspace \
@@ -87,7 +166,7 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             AD_HOC_CODE_SIGNING_ALLOWED=YES
 
-      - name: 10. Package Unsigned IPA Archive
+      - name: 12. Package Unsigned Device IPA Archive
         working-directory: build
         run: |
           mkdir -p Payload
@@ -97,7 +176,7 @@ jobs:
           echo "Generated IPA Checksum:"
           cat KuroStop-unsigned.ipa.sha256
 
-      - name: 11. Validate IPA Structure & Binary Architecture
+      - name: 13. Validate IPA Structure & Binary Architecture
         working-directory: build
         run: |
           test -f KuroStop-unsigned.ipa || (echo "Error: IPA file missing!" && exit 1)
@@ -110,14 +189,14 @@ jobs:
           # Inspect binary architectures
           otool -vh Payload/KuroStop.app/KuroStop || file Payload/KuroStop.app/KuroStop
           
-          # Verify no embedded provisioning profile (clean unsigned package)
+          # Verify clean unsigned package
           if [ -f Payload/KuroStop.app/embedded.mobileprovision ]; then
             echo "Warning: embedded.mobileprovision found in unsigned build"
           else
             echo "Confirmed: No provisioning profile embedded. Clean unsigned artifact ready for sideloading."
           fi
 
-      - name: 12. Upload Unsigned IPA Artifact
+      - name: 14. Upload Unsigned IPA Artifact
         uses: actions/upload-artifact@v4
         with:
           name: KuroStop-Unsigned-IPA

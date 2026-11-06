@@ -8,7 +8,7 @@
  */
 import { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, Redirect } from 'expo-router';
 
 import { DaySheet, type Mark } from '@/components/consequence/DaySheet';
 import { ProgressBar } from '@/components/ui/controls';
@@ -33,14 +33,36 @@ import {
 
 export default function TodayDashboard() {
   const { state, actions } = useApp();
-  const { now, today, index, stat, zone, simulated, settings } = useToday();
 
-  // First-launch onboarding guard
-  useEffect(() => {
-    if (state.isReady && !state.onboarded) {
-      router.replace('/onboarding');
-    }
-  }, [state.isReady, state.onboarded]);
+  if (state.status === "initializing") {
+    return (
+      <View style={{ flex: 1, backgroundColor: color.paper, justifyContent: "center", alignItems: "center" }}>
+        <Txt variant="headline" color={color.ink2}>KuroStop</Txt>
+        <Txt variant="caption" color={color.ink4} style={{ marginTop: 6 }}>Memuat data lokal...</Txt>
+      </View>
+    );
+  }
+
+  if (state.status === "error") {
+    return (
+      <View style={{ flex: 1, backgroundColor: color.paper, justifyContent: "center", alignItems: "center", padding: 24, gap: 12 }}>
+        <Txt variant="headline" color={color.vermilion}>Gagal Memuat Database</Txt>
+        <Txt variant="body" color={color.ink3} center>{state.error || "Terjadi kesalahan sistem penyimpanan lokal."}</Txt>
+        <Button label="Coba Lagi" onPress={() => actions.retryInit()} />
+      </View>
+    );
+  }
+
+  if (state.isReady && !state.onboarded) {
+    return <Redirect href="/onboarding" />;
+  }
+
+  return <TodayDashboardContent />;
+}
+
+function TodayDashboardContent() {
+  const { state, actions } = useApp();
+  const { now, today, index, stat, zone, simulated, settings } = useToday();
 
   // ── Accountability message ──
   const msg = settings.messagesOn
@@ -129,24 +151,7 @@ export default function TodayDashboard() {
     </View>
   );
 
-  if (state.status === 'initializing') {
-    return (
-      <View style={{ flex: 1, backgroundColor: color.paper, justifyContent: 'center', alignItems: 'center' }}>
-        <Txt variant="headline" color={color.ink2}>KuroStop</Txt>
-        <Txt variant="caption" color={color.ink4} style={{ marginTop: 6 }}>Memuat data lokal...</Txt>
-      </View>
-    );
-  }
 
-  if (state.status === 'error') {
-    return (
-      <View style={{ flex: 1, backgroundColor: color.paper, justifyContent: 'center', alignItems: 'center', padding: 24, gap: 12 }}>
-        <Txt variant="headline" color={color.vermilion}>Gagal Memuat Database</Txt>
-        <Txt variant="body" color={color.ink3} center>{state.error || 'Terjadi kesalahan sistem penyimpanan lokal.'}</Txt>
-        <Button label="Coba Lagi" onPress={() => actions.retryInit()} />
-      </View>
-    );
-  }
 
   return (
     <Screen
