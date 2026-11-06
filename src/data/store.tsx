@@ -6,7 +6,7 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
-import { getAppDatabase, runMigrations } from '../db';
+import { getAppDatabase, resetDatabaseConnection, runMigrations } from '../db';
 import type { IDatabase } from '../db/database.interface';
 import {
   SmokingRepository,
@@ -176,11 +176,14 @@ export function AppProvider({
       isInitializingRef.current = true;
 
       try {
+        console.log('[KuroStop] APP_START: Opening SQLite database...');
         const db = database ?? (await getAppDatabase());
+        console.log('[KuroStop] SQLITE_OPENED');
         if (!active) return;
         dbRef.current = db;
 
         await runMigrations(db);
+        console.log('[KuroStop] MIGRATIONS_COMPLETE');
 
         const repos: Repositories = {
           smoking: new SmokingRepository(db),
@@ -195,6 +198,7 @@ export function AppProvider({
 
         // Load settings
         const persistedSettings = await repos.settings.getSettings();
+        console.log('[KuroStop] SETTINGS_LOADED');
 
         // Load all entries without query truncation limits
         const [smokes, pmos, sleeps, purchases, urges, checkins] = await Promise.all([
@@ -543,6 +547,8 @@ export function AppProvider({
       },
 
       retryInit: async () => {
+        resetDatabaseConnection();
+        isInitializingRef.current = false;
         setInitTick((t) => t + 1);
       },
 
@@ -572,6 +578,7 @@ export function AppProvider({
         const repos = reposRef.current;
         if (!repos) return;
         const persistedSettings = await repos.settings.getSettings();
+        console.log('[KuroStop] SETTINGS_LOADED');
         const [smokes, pmos, sleeps, purchases, urges, checkins] = await Promise.all([
           repos.smoking.getAll(),
           repos.pmo.getAll(),

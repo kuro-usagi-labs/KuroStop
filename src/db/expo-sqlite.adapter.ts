@@ -43,6 +43,10 @@ export class ExpoSqliteAdapter implements IDatabase {
 
 let instancePromise: Promise<IDatabase> | null = null;
 
+export function resetDatabaseConnection(): void {
+  instancePromise = null;
+}
+
 export async function openKuroStopDatabase(dbName = 'kurostop.db'): Promise<IDatabase> {
   const nativeDb = await SQLite.openDatabaseAsync(dbName);
   // Configure SQLite pragmas for durability and speed
@@ -56,7 +60,11 @@ export async function openKuroStopDatabase(dbName = 'kurostop.db'): Promise<IDat
 
 export function getAppDatabase(): Promise<IDatabase> {
   if (!instancePromise) {
-    instancePromise = openKuroStopDatabase();
+    instancePromise = openKuroStopDatabase().catch((err) => {
+      // Clear cached promise on failure to allow clean retry
+      instancePromise = null;
+      throw err;
+    });
   }
   return instancePromise;
 }

@@ -10,7 +10,7 @@
     "ios": {
       "bundleIdentifier": "com.kurostop.personal",
       "supportsTablet": false,
-      "buildNumber": "1",
+      "buildNumber": "2",
       "infoPlist": {
         "NSFaceIDUsageDescription": "KuroStop memerlukan izin Face ID untuk mengamankan catatan disiplin pribadi Anda.",
         "UIRequiresFullScreen": true,
@@ -23,6 +23,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-font",
       [
         "expo-splash-screen",
         {
@@ -47,8 +48,7 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     }
   }
 }
