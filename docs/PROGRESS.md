@@ -143,3 +143,43 @@
 - [x] 0 ESLint errors (`npx eslint "src/**/*.{ts,tsx}" --quiet`)
 - [x] Created `docs/PHASE5_RELEASE_AUDIT.md`, `docs/REPOSITORY_MIGRATION.md`, `docs/IOS_DEVICE_TESTS.md`
 - [x] Updated `README.md`, `docs/GITHUB_ACTIONS_BUILD.md`, `docs/SIDELOAD_GUIDE.md`, `docs/ARCHITECTURE.md`
+
+
+---
+
+## Phase 5.1: Critical iOS Startup Crash Investigation & Hotfix [COMPLETED]
+
+### Milestone 1: Failure Investigation & Root Cause Identification [COMPLETED]
+- [x] Investigated SpringBoard cold-launch crash on physical iPhone
+- [x] Isolated React Compiler (`reactCompiler: true`) vs Hermes bytecode invariant violations with Reanimated mutable shared values
+- [x] Identified synchronous `@expo/vector-icons/Ionicons` font registration race condition on root tab bar
+- [x] Isolated unprotected initialization and hook evaluation in `TodayDashboard` (`src/app/index.tsx`)
+- [x] Identified imperative onboarding navigation race during root mount
+- [x] Isolated cached rejected promise in SQLite adapter
+
+### Milestone 2: Hotfix Implementation & Quality Hardening [COMPLETED]
+- [x] Disabled React Compiler in `app.json` and added `expo-font` plugin
+- [x] Integrated `useFonts({ ...Ionicons.font })` and `SplashScreen.preventAutoHideAsync()` in `src/app/_layout.tsx`
+- [x] Added top-level React `ErrorBoundary` in `src/app/_layout.tsx` with user-facing recovery UI
+- [x] Extracted `TodayDashboardContent` and guarded domain logic behind `state.isReady` in `src/app/index.tsx`
+- [x] Switched to declarative `<Redirect href="/onboarding" />`
+- [x] Added `resetDatabaseConnection()` in `src/db/expo-sqlite.adapter.ts` and cleared rejected promises on failure
+- [x] Added structured milestone logging (`APP_START`, `SQLITE_OPENED`, `MIGRATIONS_COMPLETE`, `SETTINGS_LOADED`)
+- [x] Incremented build number to `"2"` in `app.json`
+
+### Milestone 3: CI/CD iOS Simulator Release Startup Smoke Test [COMPLETED]
+- [x] Added Step 9 in `.github/workflows/build-ios-unsigned.yml`: builds Release app for `iphonesimulator`
+- [x] Automated simulator boot via `xcrun simctl`
+- [x] Automated app installation and background log streaming
+- [x] Automated launch of `com.kurostop.personal` with 10s wait for cold launch & SQLite migrations
+- [x] Automated verification screenshot capture (`build_sim/screenshots/startup_verified.png`)
+- [x] Automated process liveness check (`launchctl list | grep com.kurostop.personal`) to fail CI on startup crash
+- [x] Added Step 10: Upload smoke test screenshot and diagnostic log artifacts
+
+### Milestone 4: Verification, PR & Repository Update [COMPLETED]
+- [x] 67 automated tests passing (`npm test`)
+- [x] 0 TypeScript compilation errors (`npx tsc --noEmit`)
+- [x] 0 ESLint errors (`npm run lint`)
+- [x] Committed to `hotfix/ios-startup-crash`, created PR #2, and merged into `main` (`ade202bb51ce6e992a0cd66085d773ce65cb671a`)
+- [x] Dispatched and monitored GitHub Actions run `42294512651`
+- [x] Documented complete incident report in `docs/HOTFIX_STARTUP_CRASH.md`
