@@ -8,7 +8,8 @@
  */
 import { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { router, Redirect } from 'expo-router';
+import { router } from 'expo-router';
+import OnboardingScreen from './onboarding';
 
 import { DaySheet, type Mark } from '@/components/consequence/DaySheet';
 import { ProgressBar } from '@/components/ui/controls';
@@ -54,7 +55,7 @@ export default function TodayDashboard() {
   }
 
   if (state.isReady && !state.onboarded) {
-    return <Redirect href="/onboarding" />;
+    return <OnboardingScreen />;
   }
 
   return <TodayDashboardContent />;

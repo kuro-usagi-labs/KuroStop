@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOut, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,15 +12,12 @@ type Ctx = {
   toast: Toast | null;
   show: (t: Omit<Toast, 'id'>) => void;
   dismiss: () => void;
-  hosts: string[];
-  register: (id: string) => () => void;
 };
 
 const ToastContext = createContext<Ctx | null>(null);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<Toast | null>(null);
-  const [hosts, setHosts] = useState<string[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dismiss = useCallback(() => setToast(null), []);
   const show = useCallback((t: Omit<Toast, 'id'>) => {
@@ -29,11 +26,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     AccessibilityInfo.announceForAccessibility(`${t.title}${t.body ? `. ${t.body}` : ''}`);
     timer.current = setTimeout(() => setToast(null), t.undo ? 5000 : 2600);
   }, []);
-  const register = useCallback((id: string) => {
-    setHosts((h) => [...h, id]);
-    return () => setHosts((h) => h.filter((x) => x !== id));
-  }, []);
-  const value = useMemo(() => ({ toast, show, dismiss, hosts, register }), [toast, show, dismiss, hosts, register]);
+
+  const value = useMemo(() => ({ toast, show, dismiss }), [toast, show, dismiss]);
   return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 }
 
@@ -44,20 +38,15 @@ export function useToast() {
 }
 
 /**
- * Renders the active toast. Several hosts can be mounted (root + modals);
- * only the most recently mounted one draws, so a toast is never hidden
- * behind a native modal.
+ * Renders the active toast at the root of the screen.
  */
 export function ToastHost({ bottom = 96 }: { bottom?: number }) {
-  const ctx = useContext(ToastContext)!;
-  const id = useId();
+  const ctx = useContext(ToastContext);
   const insets = useSafeAreaInsets();
   const rm = useReduceMotion();
-  const { register } = ctx;
-  useEffect(() => register(id), [register, id]);
-  const active = ctx.hosts[ctx.hosts.length - 1] === id;
-  const t = ctx.toast;
-  if (!active || !t) return null;
+  const t = ctx?.toast;
+  if (!t) return null;
+
   return (
     <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end', paddingBottom: insets.bottom + bottom }]}>
       <Animated.View
@@ -79,7 +68,7 @@ export function ToastHost({ bottom = 96 }: { bottom?: number }) {
             accessibilityLabel="Batalkan catatan terakhir"
             onPress={() => {
               t.undo?.();
-              ctx.dismiss();
+              ctx?.dismiss();
             }}
             style={styles.undo}>
             <Icon name="arrow-undo" size={14} color={color.ink} />
@@ -98,20 +87,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 12,
-    paddingLeft: 12,
-    paddingRight: 10,
-    borderRadius: radius.lg,
+    paddingHorizontal: 14,
+    borderRadius: radius.card,
     backgroundColor: color.ink,
     ...shadow.float,
   },
-  dot: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  dot: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   undo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: color.white,
-    paddingHorizontal: 12,
-    height: 36,
-    borderRadius: 18,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: color.paper,
+    borderRadius: radius.pill,
   },
 });
