@@ -4,34 +4,51 @@
     "slug": "kurostop",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/icon.png",
+    "scheme": "kurostop",
     "userInterfaceStyle": "light",
-    "backgroundColor": "#F8FAF9",
     "ios": {
-      "supportsTablet": false,
       "bundleIdentifier": "com.kurostop.personal",
-      "userInterfaceStyle": "light",
+      "supportsTablet": false,
+      "buildNumber": "1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "UIRequiresFullScreen": true
+        "NSFaceIDUsageDescription": "KuroStop memerlukan izin Face ID untuk mengamankan catatan disiplin pribadi Anda.",
+        "UIRequiresFullScreen": true,
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#F8FAF9",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "package": "com.kurostop.personal",
-      "predictiveBackGestureEnabled": false
-    },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "output": "server",
+      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F2F3F0",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76
+        }
+      ],
       "expo-sqlite",
-      "expo-font"
-    ]
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "KuroStop memerlukan izin Face ID untuk mengamankan catatan disiplin pribadi Anda."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#1C1C1E"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
   }
 }
