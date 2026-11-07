@@ -71,6 +71,7 @@ export default function HistoryScreen() {
     <Screen
       title="Riwayat"
       eyebrow="STATISTIK & KALENDER"
+      hasTabBar={false}
       right={
         <IconButton
           icon="close"

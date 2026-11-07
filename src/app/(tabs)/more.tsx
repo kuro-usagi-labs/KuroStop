@@ -22,9 +22,16 @@ export default function MoreScreen() {
     });
   };
 
-  const handleRestartOnboarding = () => {
-    actions.restartOnboarding();
-    router.replace('/onboarding');
+  const handleRestartOnboarding = async () => {
+    try {
+      await actions.restartOnboarding();
+    } catch (err) {
+      toast({
+        title: 'Gagal memulai ulang onboarding',
+        body: (err as Error)?.message || 'Pengaturan tidak dapat disimpan.',
+        tone: 'danger',
+      });
+    }
   };
 
   return (

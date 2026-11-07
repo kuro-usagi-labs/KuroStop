@@ -1,6 +1,6 @@
-import { ComponentProps, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Tabs } from 'expo-router';
+import { useEffect } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -51,7 +51,6 @@ export default function RootLayout() {
     return (
       <View
         testID="root-loading"
-       
         style={{ flex: 1, backgroundColor: color.paper }}
       />
     );
@@ -63,7 +62,7 @@ export default function RootLayout() {
         <AppLockProvider>
           <View style={{ flex: 1, backgroundColor: color.paper }} testID="root-app-container">
             <StatusBar style="dark" />
-            <RootTabs />
+            <RootNavigator />
             <ToastHost />
           </View>
         </AppLockProvider>
@@ -72,93 +71,71 @@ export default function RootLayout() {
   );
 }
 
-function RootTabs() {
-  const { state } = useApp();
-  const hideTabs = state.isReady && !state.onboarded;
+/**
+ * Root Stack + declarative onboarding gate.
+ *
+ * `Stack.Protected` gives us auth-style routing without imperative redirects:
+ * when onboarding finishes the guard flips, the onboarding screen is removed
+ * from the navigator and the router lands on the tab group automatically.
+ * This replaces the old pattern of mounting onboarding inside the Today screen
+ * (duplicate source of truth) and calling `router.replace('/')` manually.
+ */
+function RootNavigator() {
+  const { state, actions } = useApp();
+
+  if (state.status === 'initializing') {
+    return (
+      <View testID="db-initializing" style={styles.boot}>
+        <Txt variant="headline" color={color.ink2}>KuroStop</Txt>
+        <Txt variant="caption" color={color.ink4} style={{ marginTop: 6 }}>
+          Memuat data lokal...
+        </Txt>
+        <ActivityIndicator color={color.ink3} style={{ marginTop: 18 }} />
+      </View>
+    );
+  }
+
+  if (state.status === 'error') {
+    return (
+      <View testID="db-error" style={styles.boot}>
+        <Txt variant="headline" color={color.vermilion}>Gagal Memuat Database</Txt>
+        <Txt variant="body" color={color.ink3} center style={{ marginVertical: 12 }}>
+          {state.error || 'Terjadi kesalahan sistem penyimpanan lokal.'}
+        </Txt>
+        <Button label="Coba Lagi" onPress={() => actions.retryInit()} />
+      </View>
+    );
+  }
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: color.ink,
-        tabBarInactiveTintColor: color.ink4,
-        tabBarStyle: hideTabs
-          ? { display: 'none' }
-          : {
-              backgroundColor: color.sheet,
-              borderTopColor: color.hair,
-              borderTopWidth: 0.5,
-              paddingTop: 6,
-              height: 88,
-            },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
-          letterSpacing: 0.2,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Hari Ini',
-          tabBarIcon: ({ color: c, size }) => (
-            <TabIcon name="today-outline" color={c} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="smoke"
-        options={{
-          title: 'Rokok',
-          tabBarIcon: ({ color: c, size }) => (
-            <TabIcon name="flame-outline" color={c} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="pmo"
-        options={{
-          title: 'PMO',
-          tabBarIcon: ({ color: c, size }) => (
-            <TabIcon name="eye-off-outline" color={c} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="sleep"
-        options={{
-          title: 'Tidur',
-          tabBarIcon: ({ color: c, size }) => (
-            <TabIcon name="moon-outline" color={c} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="more"
-        options={{
-          title: 'Lainnya',
-          tabBarIcon: ({ color: c, size }) => (
-            <TabIcon name="grid-outline" color={c} size={size} />
-          ),
-        }}
-      />
-      {/* Hide sub-screens from tab bar */}
-      <Tabs.Screen name="log" options={{ href: null }} />
-      <Tabs.Screen name="history" options={{ href: null }} />
-      <Tabs.Screen name="money" options={{ href: null }} />
-      <Tabs.Screen name="urge" options={{ href: null }} />
-      <Tabs.Screen name="settings" options={{ href: null }} />
-      <Tabs.Screen name="onboarding" options={{ href: null }} />
-    </Tabs>
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.paper } }}>
+      <Stack.Protected guard={!state.onboarded}>
+        <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={state.onboarded}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="log" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="history" />
+        <Stack.Screen name="money" />
+        <Stack.Screen name="urge" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="settings" />
+        {/* Kept inside the guard so unknown links during onboarding fall back to
+            the onboarding wizard instead of the not-found screen. */}
+        <Stack.Screen name="+not-found" options={{ title: 'Tidak Ditemukan' }} />
+      </Stack.Protected>
+    </Stack>
   );
 }
 
-function TabIcon({ name, color: c, size }: { name: ComponentProps<typeof Ionicons>['name']; color?: any; size: number }) {
-  return <Ionicons name={name} size={size ?? 24} color={c || color.ink} />;
-}
-
 const styles = StyleSheet.create({
+  boot: {
+    flex: 1,
+    backgroundColor: color.paper,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
   errorContainer: {
     flex: 1,
     backgroundColor: color.paper,

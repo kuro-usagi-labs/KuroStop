@@ -67,6 +67,7 @@ export default function MoneyScreen() {
     <Screen
       title="Keuangan"
       eyebrow="PENGELUARAN & TABUNGAN"
+      hasTabBar={false}
       right={
         <IconButton
           icon="close"
@@ -122,7 +123,7 @@ export default function MoneyScreen() {
         label="Catat Pembelian Rokok"
         icon="cart-outline"
         variant="secondary"
-        onPress={() => router.push('/log?habit=smoke')}
+        onPress={() => router.push('/log?habit=purchase')}
       />
 
       {/* Periodic Breakdown */}

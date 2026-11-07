@@ -169,6 +169,7 @@ export default function UrgeScreen() {
     <Screen
       title="Gue Lagi Pengen..."
       eyebrow="INTERVENSI DORONGAN"
+      hasTabBar={false}
       right={
         <IconButton
           icon="close"

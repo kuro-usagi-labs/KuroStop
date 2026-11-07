@@ -12,19 +12,21 @@ export const TAB_BAR_SPACE = 104;
 
 /** Root scroll container for tab screens: own large title, safe areas, tab bar clearance. */
 export function Screen({
-  title, eyebrow, right, children, contentStyle, ...rest
+  title, eyebrow, right, children, contentStyle, hasTabBar = true, ...rest
 }: ScrollViewProps & {
   title: string;
   eyebrow?: string;
   right?: ReactNode;
   children: ReactNode;
   contentStyle?: StyleProp<ViewStyle>;
+  /** Set false for screens pushed above the tab navigator so they don't reserve tab-bar space. */
+  hasTabBar?: boolean;
 }) {
   const insets = useSafeAreaInsets();
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: color.paper }}
-      contentContainerStyle={[{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + TAB_BAR_SPACE, paddingHorizontal: space.md, gap: space.lg }, contentStyle]}
+      contentContainerStyle={[{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + (hasTabBar ? TAB_BAR_SPACE : 40), paddingHorizontal: space.md, gap: space.lg }, contentStyle]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       {...rest}>

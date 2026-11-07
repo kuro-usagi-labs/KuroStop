@@ -9,7 +9,6 @@
 import { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import OnboardingScreen from './onboarding';
 
 import { DaySheet, type Mark } from '@/components/consequence/DaySheet';
 import { ProgressBar } from '@/components/ui/controls';
@@ -34,34 +33,8 @@ import { logMilestone } from '@/lib/milestone';
 /* ════════════════════════════════════════════════════════════════ */
 
 export default function TodayDashboard() {
-  const { state, actions } = useApp();
-
-  if (state.status === "initializing") {
-    return (
-      <View
-        testID="db-initializing"
-        style={{ flex: 1, backgroundColor: color.paper, justifyContent: "center", alignItems: "center" }}
-      >
-        <Txt variant="headline" color={color.ink2}>KuroStop</Txt>
-        <Txt variant="caption" color={color.ink4} style={{ marginTop: 6 }}>Memuat data lokal...</Txt>
-      </View>
-    );
-  }
-
-  if (state.status === "error") {
-    return (
-      <View style={{ flex: 1, backgroundColor: color.paper, justifyContent: "center", alignItems: "center", padding: 24, gap: 12 }}>
-        <Txt variant="headline" color={color.vermilion}>Gagal Memuat Database</Txt>
-        <Txt variant="body" color={color.ink3} center>{state.error || "Terjadi kesalahan sistem penyimpanan lokal."}</Txt>
-        <Button label="Coba Lagi" onPress={() => actions.retryInit()} />
-      </View>
-    );
-  }
-
-  if (state.isReady && !state.onboarded) {
-    return <OnboardingScreen />;
-  }
-
+  // Readiness, database errors and the onboarding gate are handled once by the
+  // root navigator (src/app/_layout.tsx). This screen only renders the dashboard.
   return <TodayDashboardContent />;
 }
 
@@ -256,31 +229,37 @@ function TodayDashboardContent() {
 
       {/* ─── 3. Quick Actions ─── */}
       <Section index={2}>
-        <View style={styles.quickRow}>
-          {settings.habits.smoke ? (
-            <Button
-              testID="quick-log-smoke"
-              label="Catat Rokok"
-              icon="flame-outline"
-              variant="secondary"
-              size="md"
-              onPress={() => router.push('/log?habit=smoke')}
-              accessibilityHint="Buka form pencatatan rokok"
-              style={{ flex: 1 }}
-            />
-          ) : null}
-          {settings.habits.pmo ? (
-            <Button
-              label="Catat PMO"
-              icon="eye-off-outline"
-              variant="secondary"
-              size="md"
-              onPress={() => router.push('/log?habit=pmo')}
-              accessibilityHint="Buka form pencatatan PMO"
-              style={{ flex: 1 }}
-            />
+        <View style={styles.quickStack}>
+          {(settings.habits.smoke || settings.habits.pmo) ? (
+            <View style={styles.quickRow}>
+              {settings.habits.smoke ? (
+                <Button
+                  testID="quick-log-smoke"
+                  label="Catat Rokok"
+                  icon="flame-outline"
+                  variant="secondary"
+                  size="md"
+                  onPress={() => router.push('/log?habit=smoke')}
+                  accessibilityHint="Buka form pencatatan rokok"
+                  style={{ flex: 1 }}
+                />
+              ) : null}
+              {settings.habits.pmo ? (
+                <Button
+                  testID="quick-log-pmo"
+                  label="Catat PMO"
+                  icon="eye-off-outline"
+                  variant="secondary"
+                  size="md"
+                  onPress={() => router.push('/log?habit=pmo')}
+                  accessibilityHint="Buka form pencatatan PMO"
+                  style={{ flex: 1 }}
+                />
+              ) : null}
+            </View>
           ) : null}
           <Button
+            testID="quick-urge"
             label="Gue Lagi Pengen..."
             icon="pulse-outline"
             variant="accent"
@@ -288,7 +267,6 @@ function TodayDashboardContent() {
             size="md"
             onPress={() => router.push('/urge')}
             accessibilityHint="Catat dorongan yang sedang dirasakan"
-            style={{ flex: 1 }}
           />
         </View>
       </Section>
@@ -447,10 +425,12 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
   },
+  quickStack: {
+    gap: 8,
+  },
   quickRow: {
     flexDirection: 'row',
     gap: 8,
-    flexWrap: 'wrap',
   },
   trendRow: {
     flexDirection: 'row',

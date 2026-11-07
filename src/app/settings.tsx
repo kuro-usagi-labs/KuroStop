@@ -72,9 +72,18 @@ export default function SettingsScreen() {
     );
   };
 
-  const handleRestartOnboarding = () => {
-    actions.restartOnboarding();
-    router.replace('/onboarding');
+  const handleRestartOnboarding = async () => {
+    try {
+      // Flipping `onboarded` back to false makes the root Stack guard swap the
+      // navigator back to the onboarding screen — no imperative redirect needed.
+      await actions.restartOnboarding();
+    } catch (err) {
+      toast({
+        title: 'Gagal memulai ulang onboarding',
+        body: (err as Error)?.message || 'Pengaturan tidak dapat disimpan.',
+        tone: 'danger',
+      });
+    }
   };
 
   const handleToggleAppLock = async (enable: boolean) => {
@@ -154,6 +163,7 @@ export default function SettingsScreen() {
     <Screen
       title="Pengaturan"
       eyebrow="PREFERENSI & ATURAN"
+      hasTabBar={false}
       right={
         <IconButton
           icon="close"

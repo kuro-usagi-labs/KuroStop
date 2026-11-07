@@ -3,13 +3,19 @@
  * Provides:
  * 1. App Switcher Shield: Masks app content when iOS transitions to inactive/background.
  * 2. Biometric App Lock: Face ID / Touch ID / Passcode lock when appLock setting is enabled.
+ *
+ * Safety rules:
+ * - Never cover onboarding or the boot/error screens.
+ * - Prompt at most once per lock cycle (no re-prompt loops on foreground).
+ * - Fail open when the device has no biometrics AND no passcode, so a user can
+ *   never be permanently trapped behind an unescapable overlay.
  */
 
-import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AppState, type AppStateStatus, StyleSheet, View } from 'react-native';
 
 import { useApp } from '@/data/store';
-import { authenticateAsync } from '@/lib/biometrics';
+import { authenticateAsync, checkBiometricsStatus } from '@/lib/biometrics';
 import { color, radius, space } from '@/theme/tokens';
 import { Button, Card, Txt } from '@/components/ui/primitives';
 import { haptic } from '@/lib/haptics';
@@ -32,14 +38,21 @@ export function useAppLock() {
 
 export function AppLockProvider({ children }: { children: React.ReactNode }) {
   const { state } = useApp();
-  const appLockEnabled = state.settings.appLock;
+  const appLockEnabled = state.settings.appLock && state.isReady && state.onboarded;
 
-  const [isLocked, setIsLocked] = useState(() => appLockEnabled);
+  const [isLocked, setIsLocked] = useState(false);
   const [isInBackground, setIsInBackground] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [canAuthenticate, setCanAuthenticate] = useState(true);
 
   const backgroundTimestampRef = useRef<number>(0);
   const isPromptingRef = useRef<boolean>(false);
+  const autoPromptedRef = useRef<boolean>(false);
+  const resolvedInitialLockRef = useRef<boolean>(false);
+  const isLockedRef = useRef<boolean>(isLocked);
+  useEffect(() => {
+    isLockedRef.current = isLocked;
+  }, [isLocked]);
 
   const handleUnlock = useCallback(async (): Promise<boolean> => {
     if (isPromptingRef.current) return false;
@@ -47,34 +60,57 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
     setAuthError(null);
 
     try {
+      const status = await checkBiometricsStatus();
+      if (!status.hasHardware && !status.isEnrolled) {
+        // No secure unlock method exists on this device — do not trap the user.
+        setCanAuthenticate(false);
+        setIsLocked(false);
+        autoPromptedRef.current = false;
+        return true;
+      }
+
+      setCanAuthenticate(true);
       const res = await authenticateAsync('Buka kunci KuroStop untuk melihat catatan');
       if (res.success) {
+        autoPromptedRef.current = false;
         setIsLocked(false);
         setAuthError(null);
         haptic.success();
         return true;
-      } else {
-        setAuthError(res.error || 'Autentikasi tidak berhasil.');
-        haptic.error();
-        return false;
       }
+
+      setAuthError(res.error || 'Autentikasi tidak berhasil.');
+      haptic.error();
+      return false;
     } finally {
       isPromptingRef.current = false;
     }
   }, []);
 
   const handleLock = useCallback(() => {
-    if (appLockEnabled) {
-      setIsLocked(true);
-      setAuthError(null);
-    }
+    if (!appLockEnabled) return;
+    autoPromptedRef.current = false;
+    setIsLocked(true);
+    setAuthError(null);
   }, [appLockEnabled]);
 
-  // Prompt on initial launch if locked
+  // Adopt the persisted `appLock` setting exactly once, as soon as it is loaded.
   useEffect(() => {
-    if (appLockEnabled && isLocked) {
-      handleUnlock();
+    if (!state.isReady || resolvedInitialLockRef.current) return;
+    resolvedInitialLockRef.current = true;
+    if (state.settings.appLock) {
+      autoPromptedRef.current = false;
+      setIsLocked(true);
     }
+  }, [state.isReady, state.settings.appLock]);
+
+  // Auto-prompt once per lock cycle. The ref guard is what prevents the
+  // "Face ID prompt every render / every foreground" loop.
+  useEffect(() => {
+    if (!appLockEnabled || !isLocked) return;
+    if (autoPromptedRef.current) return;
+    autoPromptedRef.current = true;
+    void handleUnlock();
   }, [appLockEnabled, isLocked, handleUnlock]);
 
   // AppState lifecycle listener for iOS background/foreground transitions
@@ -85,26 +121,36 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
         if (backgroundTimestampRef.current === 0) {
           backgroundTimestampRef.current = Date.now();
         }
-      } else if (nextState === 'active') {
-        const bgDuration = Date.now() - backgroundTimestampRef.current;
-        backgroundTimestampRef.current = 0;
-        setIsInBackground(false);
+        return;
+      }
 
-        // Lock if appLock is enabled and was in background
-        if (appLockEnabled) {
-          // Strict lock or > 3 seconds in background
-          if (bgDuration > 2000 || isLocked) {
-            setIsLocked(true);
-            handleUnlock();
-          }
-        }
+      if (nextState !== 'active') return;
+
+      const bgDuration = Date.now() - backgroundTimestampRef.current;
+      backgroundTimestampRef.current = 0;
+      setIsInBackground(false);
+
+      // A biometric prompt briefly drives the app through `inactive`; never
+      // treat that as a new "returned from background" lock event.
+      if (isPromptingRef.current) return;
+      if (!appLockEnabled) return;
+
+      if (bgDuration > 2000) {
+        // Genuinely returned from the background: require a fresh unlock.
+        autoPromptedRef.current = false;
+        setIsLocked(true);
+      } else if (isLockedRef.current) {
+        // Still locked; keep the lock but do not re-trigger the auto prompt.
+        setIsLocked(true);
       }
     });
 
     return () => {
       subscription.remove();
     };
-  }, [appLockEnabled, isLocked, handleUnlock]);
+  }, [appLockEnabled]);
+
+  const overlayVisible = appLockEnabled && isLocked && canAuthenticate && !isInBackground;
 
   return (
     <AppLockContext.Provider value={{ isLocked: appLockEnabled && isLocked, unlock: handleUnlock, lock: handleLock }}>
@@ -112,7 +158,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
         {children}
 
         {/* 1. App Switcher Privacy Shield (Masks content during iOS multitasking / snapshots) */}
-        {isInBackground && (
+        {isInBackground && appLockEnabled && (
           <View style={styles.privacyShield} accessibilityElementsHidden aria-hidden>
             <View style={styles.shieldEmblem}>
               <Txt variant="hero" color={color.white}>K</Txt>
@@ -121,13 +167,13 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
               KuroStop
             </Txt>
             <Txt variant="footnote" color={color.ink4} style={{ marginTop: 4 }}>
-              Privat & Terenkripsi Lokal
+              Privat &amp; Terenkripsi Lokal
             </Txt>
           </View>
         )}
 
         {/* 2. Biometric App Lock Screen */}
-        {appLockEnabled && isLocked && !isInBackground && (
+        {overlayVisible && (
           <View style={styles.lockScreen}>
             <Card style={styles.lockCard}>
               <View style={styles.shieldEmblem}>
