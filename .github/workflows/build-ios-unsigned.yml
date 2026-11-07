@@ -11,6 +11,8 @@ on:
         options:
           - Release
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
