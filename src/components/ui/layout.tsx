@@ -5,12 +5,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useReduceMotion } from '@/data/hooks';
 import { motionPresets } from '@/theme/motion';
-import { color, radius, space } from '@/theme/tokens';
+import { color, gutter, radius, space } from '@/theme/tokens';
 import { Divider, Icon, PressableScale, Txt, type IconName } from './primitives';
 
-export const TAB_BAR_SPACE = 104;
+export const TAB_BAR_SPACE = 96;
 
-/** Root scroll container for tab screens: own large title, safe areas, tab bar clearance. */
+/**
+ * Root scroll container.
+ *
+ * Hierarchy comes from three levels only: screen title (30), small-caps section
+ * label (11), body (17). Cards are flat sheets with a hairline edge — elevation
+ * is reserved for the signature DaySheet and floating layers.
+ */
 export function Screen({
   title, eyebrow, right, children, contentStyle, hasTabBar = true, ...rest
 }: ScrollViewProps & {
@@ -26,12 +32,17 @@ export function Screen({
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: color.paper }}
-      contentContainerStyle={[{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + (hasTabBar ? TAB_BAR_SPACE : 40), paddingHorizontal: space.md, gap: space.lg }, contentStyle]}
+      contentContainerStyle={[{
+        paddingTop: insets.top + 6,
+        paddingBottom: insets.bottom + (hasTabBar ? TAB_BAR_SPACE : 40),
+        paddingHorizontal: gutter,
+        gap: space.lg,
+      }, contentStyle]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       {...rest}>
       <View style={styles.header}>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, gap: 2 }}>
           {eyebrow ? <Txt variant="eyebrow" color={color.ink3}>{eyebrow}</Txt> : null}
           <Txt variant="display" accessibilityRole="header">{title}</Txt>
         </View>
@@ -49,7 +60,7 @@ export function StackScroll({ children, contentStyle, ...rest }: ScrollViewProps
     <ScrollView
       style={{ flex: 1, backgroundColor: color.paper }}
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={[{ padding: space.md, paddingBottom: insets.bottom + 40, gap: space.lg }, contentStyle]}
+      contentContainerStyle={[{ padding: gutter, paddingBottom: insets.bottom + 40, gap: space.lg }, contentStyle]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       {...rest}>
@@ -71,7 +82,8 @@ export function Section({ title, action, children, style, index = 0 }: {
     <Animated.View entering={m.enterDelay(index)} style={[{ gap: 10 }, style]}>
       {title ? (
         <View style={styles.sectionHead}>
-          <Txt variant="title2" accessibilityRole="header">{title}</Txt>
+          <Txt variant="eyebrow" color={color.ink3}>{title}</Txt>
+          <View style={styles.sectionRule} />
           {action}
         </View>
       ) : null}
@@ -94,7 +106,7 @@ export function Group({ children, footer, header }: { children: ReactNode; foote
   const items = (Array.isArray(children) ? children : [children]).flat().filter(Boolean);
   return (
     <View style={{ gap: 6 }}>
-      {header ? <Txt variant="eyebrow" color={color.ink3} style={{ marginLeft: 16 }}>{header}</Txt> : null}
+      {header ? <Txt variant="eyebrow" color={color.ink3} style={{ marginLeft: 4 }}>{header}</Txt> : null}
       <View style={styles.group}>
         {items.map((child, i) => (
           <View key={i}>
@@ -103,7 +115,7 @@ export function Group({ children, footer, header }: { children: ReactNode; foote
           </View>
         ))}
       </View>
-      {footer ? <Txt variant="footnote" color={color.ink3} style={{ marginHorizontal: 16 }}>{footer}</Txt> : null}
+      {footer ? <Txt variant="footnote" color={color.ink3} style={{ marginHorizontal: 4 }}>{footer}</Txt> : null}
     </View>
   );
 }
@@ -122,25 +134,25 @@ export function Row({
   stacked?: ReactNode;
 }) {
   const content = (
-    <View style={{ paddingVertical: 12, paddingHorizontal: 16, gap: 10 }}>
+    <View style={styles.rowWrap}>
       <View style={styles.row}>
         {icon ? (
           <View style={styles.rowIcon}>
-            <Icon name={icon} size={18} color={destructive ? color.vermilion : color.ink} />
+            <Icon name={icon} size={18} color={destructive ? color.vermilion : color.ink2} />
           </View>
         ) : null}
         <View style={{ flex: 1, gap: 1 }}>
           <Txt variant="body" color={destructive ? color.vermilion : color.ink}>{title}</Txt>
           {subtitle ? <Txt variant="footnote" color={color.ink3}>{subtitle}</Txt> : null}
         </View>
-        {value ? <Txt variant="body" color={color.ink3} num>{value}</Txt> : null}
+        {value ? <Txt variant="subhead" color={color.ink3} num>{value}</Txt> : null}
         {right}
-        {chevron ? <Icon name="chevron-forward" size={18} color={color.ink4} /> : null}
+        {chevron ? <Icon name="chevron-forward" size={17} color={color.ink3} /> : null}
       </View>
-      {stacked}
+      {stacked ? <View style={{ marginTop: 2 }}>{stacked}</View> : null}
     </View>
   );
-  if (!onPress) return <View style={{ minHeight: 48 }}>{content}</View>;
+  if (!onPress) return content;
   return (
     <PressableScale onPress={onPress} scaleTo={0.985} accessibilityLabel={title} accessibilityHint={subtitle}>
       {content}
@@ -154,10 +166,10 @@ export function EmptyState({ icon, title, body, action }: { icon: IconName; titl
   return (
     <View style={styles.empty}>
       <View style={styles.emptyIcon}>
-        <Icon name={icon} size={24} color={color.ink2} />
+        <Icon name={icon} size={22} color={color.ink3} />
       </View>
       <Txt variant="headline" center>{title}</Txt>
-      <Txt variant="subhead" color={color.ink3} center style={{ maxWidth: 280 }}>{body}</Txt>
+      <Txt variant="subhead" color={color.ink3} center style={{ maxWidth: 300 }}>{body}</Txt>
       {action}
     </View>
   );
@@ -175,6 +187,10 @@ export function PrototypeNote({ style }: { style?: StyleProp<ViewStyle> }) {
   );
 }
 
+/**
+ * A compact metric. Flat by design: `StatGrid` draws one ledger block around
+ * all of them, so four metrics read as one object instead of four cards.
+ */
 export function Stat({ label, value, sub, tone = color.ink, style, icon }: {
   label: string;
   value: string;
@@ -185,29 +201,78 @@ export function Stat({ label, value, sub, tone = color.ink, style, icon }: {
 }) {
   return (
     <View style={[styles.stat, style]} accessible accessibilityLabel={`${label}: ${value}${sub ? `, ${sub}` : ''}`}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        {icon ? <Icon name={icon} size={14} color={color.ink3} /> : null}
-        <Txt variant="footnote" color={color.ink3} numberOfLines={1}>{label}</Txt>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        {icon ? <Icon name={icon} size={13} color={color.ink3} /> : null}
+        <Txt variant="eyebrow" color={color.ink3} numberOfLines={1} style={{ flexShrink: 1 }}>{label}</Txt>
       </View>
-      <Txt variant="num" color={tone} numberOfLines={1} adjustsFontSizeToFit>{value}</Txt>
-      {sub ? <Txt variant="caption" color={color.ink3} numberOfLines={2}>{sub}</Txt> : null}
+      <Txt variant="num" color={tone}>{value}</Txt>
+      {sub ? <Txt variant="footnote" color={color.ink3}>{sub}</Txt> : null}
     </View>
   );
 }
 
+/**
+ * One white ledger block, hairline-divided into two columns. Rows are implied
+ * by position, so the block stays readable at any text size.
+ */
 export function StatGrid({ children }: { children: ReactNode }) {
-  return <View style={styles.statGrid}>{children}</View>;
+  const items = (Array.isArray(children) ? children : [children]).flat().filter(Boolean);
+  const single = items.length === 1;
+  return (
+    <View style={styles.statGrid}>
+      {items.map((child, i) => (
+        <View
+          key={i}
+          style={[
+            styles.statCell,
+            single && { width: '100%' },
+            i % 2 === 1 && styles.statCellLeft,
+            i >= 2 && styles.statCellTop,
+          ]}>
+          {child}
+        </View>
+      ))}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, marginBottom: -4 },
-  sectionHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 32 },
-  group: { backgroundColor: color.sheet, borderRadius: radius.lg, overflow: 'hidden' },
+  header: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, marginTop: 4 },
+  sectionHead: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 24 },
+  sectionRule: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: color.hair },
+  group: {
+    backgroundColor: color.sheet,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hair,
+    overflow: 'hidden',
+  },
+  rowWrap: { paddingVertical: 13, paddingHorizontal: 16, gap: 10 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 24 },
-  rowIcon: { width: 30, height: 30, borderRadius: 9, backgroundColor: color.fill, alignItems: 'center', justifyContent: 'center' },
-  empty: { alignItems: 'center', gap: 8, paddingVertical: 28, paddingHorizontal: 20, backgroundColor: color.sheet, borderRadius: radius.lg },
-  emptyIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: color.fill, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  rowIcon: { width: 32, height: 32, borderRadius: 10, backgroundColor: color.fill, alignItems: 'center', justifyContent: 'center' },
+  empty: {
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 30,
+    paddingHorizontal: 24,
+    backgroundColor: color.sheet,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hair,
+  },
+  emptyIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: color.fill, alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
   note: { flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingHorizontal: 4 },
-  stat: { flexGrow: 1, flexBasis: '45%', backgroundColor: color.sheet, borderRadius: radius.md, padding: 14, gap: 2, minHeight: 92 },
-  statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  stat: { gap: 3, flex: 1 },
+  statGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    backgroundColor: color.sheet,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hair,
+    overflow: 'hidden',
+  },
+  statCell: { width: '50%', padding: 14 },
+  statCellLeft: { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: color.hair },
+  statCellTop: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.hair },
 });

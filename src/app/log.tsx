@@ -11,10 +11,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp, type NewEntry } from '@/data/store';
 import { useToday } from '@/data/hooks';
-import { activeSleep, buildIndex, dayStat } from '@/data/selectors';
+import { activeSleep } from '@/data/selectors';
 import {
   SMOKE_TRIGGERS, PMO_TRIGGERS, PMO_LABEL,
-  type SmokeTrigger, type PmoTrigger, type PmoType, type Entry,
+  type SmokeTrigger, type PmoTrigger, type PmoType,
 } from '@/data/types';
 
 import { Segmented, Stepper, TimeAdjuster } from '@/components/ui/controls';
@@ -24,7 +24,7 @@ import { useToast } from '@/components/ui/toast';
 
 import { haptic } from '@/lib/haptics';
 import { rupiah, duration, clock } from '@/lib/format';
-import { color, radius, space } from '@/theme/tokens';
+import { color, gutter } from '@/theme/tokens';
 
 /* ─────────────────── Tab type ─────────────────── */
 
@@ -34,7 +34,7 @@ const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'smoke', label: 'Rokok' },
   { value: 'pmo', label: 'PMO' },
   { value: 'sleep', label: 'Tidur' },
-  { value: 'purchase', label: 'Beli Rokok' },
+  { value: 'purchase', label: 'Beli' },
 ];
 
 function paramToTab(p: string | undefined): Tab {
@@ -54,9 +54,10 @@ export default function LogScreen() {
       {/* ── Header ── */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <IconButton icon="chevron-back" label="Kembali" onPress={() => router.back()} tone="fill" size={38} />
-        <Txt variant="title2" style={{ flex: 1 }} accessibilityRole="header">
-          Catat
-        </Txt>
+        <View style={{ flex: 1, gap: 1 }}>
+          <Txt variant="title2" accessibilityRole="header">Catat</Txt>
+          <Txt variant="footnote" color={color.ink3}>Satu ketukan, satu catatan jujur.</Txt>
+        </View>
       </View>
 
       <StackScroll contentStyle={{ paddingTop: 0 }}>
@@ -76,7 +77,7 @@ export default function LogScreen() {
 /* ═══════════════════ ROKOK TAB ═══════════════════ */
 
 function SmokeTab() {
-  const { state, actions } = useApp();
+  const { actions } = useApp();
   const { stat, settings } = useToday();
   const toast = useToast();
 
@@ -112,33 +113,17 @@ function SmokeTab() {
   return (
     <>
       {/* Quick log 1 */}
-      <Section title="Catat Cepat" index={0}>
+      <Section title="Satu Batang" index={0}>
         <Button
           label="Catat 1 Batang"
           icon="add-circle-outline"
-          onPress={async () => {
-            try {
-              const id = await actions.add({ kind: 'smoke', at: Date.now(), qty: 1 });
-              haptic.success();
-              toast({
-                title: '1 batang dicatat',
-                icon: 'flame-outline',
-                undo: () => actions.remove(id),
-              });
-            } catch (err) {
-              haptic.warning();
-              toast({
-                title: 'Gagal mencatat',
-                body: (err as Error)?.message || 'Terjadi kesalahan saat menyimpan.',
-                tone: 'danger',
-              });
-            }
-          }}
+          onPress={() => logSmoke(1)}
+          accessibilityHint="Langsung mencatat satu batang pada waktu dan pemicu yang dipilih"
         />
       </Section>
 
       {/* Custom quantity */}
-      <Section title="Jumlah Kustom" index={1}>
+      <Section title="Jumlah Lain" index={1}>
         <Card>
           <View style={styles.centered}>
             <Stepper value={qty} onChange={setQty} min={1} max={20} label="Jumlah batang" />
@@ -234,20 +219,19 @@ function PmoTab() {
           <Button
             label="Pornografi"
             icon="eye-off-outline"
-            variant="danger"
+            variant="secondary"
             onPress={() => logPmo('p')}
           />
           <Button
             label="Masturbasi"
             icon="eye-off-outline"
-            variant="danger"
+            variant="secondary"
             onPress={() => logPmo('m')}
           />
           <Divider />
           <Button
             label="Sesi Gabungan (P+M)"
             icon="eye-off-outline"
-            variant="danger"
             onPress={() => logPmo('pmo')}
           />
           <Txt variant="footnote" color={color.ink3} center>
@@ -403,7 +387,7 @@ const UNIT_OPTIONS: { value: 'bungkus' | 'batang'; label: string }[] = [
 const BRAND_CHIPS = ['Surya 16', 'Gudang Garam', 'Sampoerna', 'Djarum', 'Marlboro', 'LA', 'Esse', 'Lainnya'];
 
 function PurchaseTab() {
-  const { state, actions } = useApp();
+  const { actions } = useApp();
   const { settings } = useToday();
   const toast = useToast();
 
@@ -545,7 +529,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingHorizontal: space.md,
+    paddingHorizontal: gutter,
     paddingBottom: 12,
   },
   centered: {

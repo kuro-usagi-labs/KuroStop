@@ -13,6 +13,9 @@ import { color } from '@/theme/tokens';
  * declared in `src/app/_layout.tsx`. Mixing "push" screens into the tab
  * navigator made `router.back()` behave like a tab switch and bounce users
  * back to "Hari Ini", so the two navigators are now kept separate.
+ *
+ * Icons are filled variants and the labels don't follow Dynamic Type, per
+ * HIG: tab titles identify destinations, they aren't reading content.
  */
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
@@ -23,20 +26,22 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: color.ink,
-        tabBarInactiveTintColor: color.ink4,
+        tabBarInactiveTintColor: color.ink3,
+        tabBarAllowFontScaling: false,
         tabBarStyle: {
           backgroundColor: color.sheet,
           borderTopColor: color.hair,
           borderTopWidth: StyleSheet.hairlineWidth,
           paddingTop: 6,
           paddingBottom: bottom,
-          height: 54 + bottom,
+          height: 50 + bottom,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
-          letterSpacing: 0.2,
+          letterSpacing: 0.1,
         },
+        tabBarIconStyle: { marginTop: 1 },
       }}
     >
       <Tabs.Screen
@@ -44,7 +49,7 @@ export default function TabsLayout() {
         options={{
           title: 'Hari Ini',
           tabBarIcon: ({ color: c, size }) => (
-            <TabIcon name="today-outline" color={c} size={size} />
+            <TabIcon name="today" color={c} size={size} />
           ),
         }}
       />
@@ -53,7 +58,7 @@ export default function TabsLayout() {
         options={{
           title: 'Rokok',
           tabBarIcon: ({ color: c, size }) => (
-            <TabIcon name="flame-outline" color={c} size={size} />
+            <TabIcon name="flame" color={c} size={size} />
           ),
         }}
       />
@@ -62,7 +67,7 @@ export default function TabsLayout() {
         options={{
           title: 'PMO',
           tabBarIcon: ({ color: c, size }) => (
-            <TabIcon name="eye-off-outline" color={c} size={size} />
+            <TabIcon name="eye-off" color={c} size={size} />
           ),
         }}
       />
@@ -71,7 +76,7 @@ export default function TabsLayout() {
         options={{
           title: 'Tidur',
           tabBarIcon: ({ color: c, size }) => (
-            <TabIcon name="moon-outline" color={c} size={size} />
+            <TabIcon name="moon" color={c} size={size} />
           ),
         }}
       />
@@ -80,7 +85,7 @@ export default function TabsLayout() {
         options={{
           title: 'Lainnya',
           tabBarIcon: ({ color: c, size }) => (
-            <TabIcon name="grid-outline" color={c} size={size} />
+            <TabIcon name="grid" color={c} size={size} />
           ),
         }}
       />
@@ -95,5 +100,5 @@ function TabIcon({
   color?: any;
   size: number;
 }) {
-  return <Ionicons name={name} size={size ?? 24} color={c || color.ink} />;
+  return <Ionicons name={name} size={Math.min(size ?? 24, 24)} color={c || color.ink} />;
 }

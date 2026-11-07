@@ -9,6 +9,10 @@ import {
 import { Txt } from '@/components/ui/primitives';
 import { useToast } from '@/components/ui/toast';
 
+/**
+ * MORE — the secondary shelf: analysis, self-control tools, app config.
+ * Onboarding restart lives in Settings, so it is not repeated here.
+ */
 export default function MoreScreen() {
   const { state, actions } = useApp();
   const toast = useToast();
@@ -16,78 +20,54 @@ export default function MoreScreen() {
   const handleResetDemo = () => {
     actions.resetDemo();
     toast({
-      title: 'Data Demo Dimuat Ulang',
+      title: 'Data demo dimuat ulang',
       body: 'Data simulasi telah disiapkan kembali.',
       icon: 'refresh',
     });
   };
 
-  const handleRestartOnboarding = async () => {
-    try {
-      await actions.restartOnboarding();
-    } catch (err) {
-      toast({
-        title: 'Gagal memulai ulang onboarding',
-        body: (err as Error)?.message || 'Pengaturan tidak dapat disimpan.',
-        tone: 'danger',
-      });
-    }
-  };
-
   return (
-    <Screen
-      title="Lainnya"
-      eyebrow="KUROSTOP"
-    >
-      {/* Pelacakan Lanjutan */}
-      <Section title="Analisis & Riwayat">
+    <Screen title="Lainnya" eyebrow="KUROSTOP">
+      <Section title="Analisis & Riwayat" index={0}>
         <Group>
           <Row
             title="Riwayat & Statistik"
-            subtitle="Kalender interaktif, tren 30 hari, dan analisis streak"
+            subtitle="Kalender, tren 30 hari, dan streak"
             icon="bar-chart-outline"
             onPress={() => router.push('/history')}
           />
           <Row
             title="Uang & Pengeluaran"
-            subtitle="Hitungan riil uang yang dibakar vs tabungan yang terselamatkan"
+            subtitle="Biaya rokok vs tabungan yang terselamatkan"
             icon="wallet-outline"
             onPress={() => router.push('/money')}
           />
         </Group>
       </Section>
 
-      {/* Alat & Intervensi */}
-      <Section title="Alat Kendali Diri">
+      <Section title="Alat Kendali Diri" index={1}>
         <Group>
           <Row
             title="Gue Lagi Pengen..."
-            subtitle="Lawan dorongan dengan latihan napas 90 detik & tantangan tunda"
+            subtitle="Latihan napas 90 detik dan tantangan tunda"
             icon="pulse-outline"
             onPress={() => router.push('/urge')}
           />
         </Group>
       </Section>
 
-      {/* Preferensi & Konfigurasi */}
-      <Section title="Aplikasi & Konfigurasi">
+      <Section title="Aplikasi" index={2}>
         <Group>
           <Row
             title="Pengaturan"
-            subtitle="Atur target harian, jam tidur, harga rokok, dan intensitas teguran"
+            subtitle="Target harian, jam tidur, harga rokok, intensitas teguran"
             icon="settings-outline"
             onPress={() => router.push('/settings')}
-          />
-          <Row
-            title="Mulai Ulang Onboarding"
-            subtitle="Buka wizard pengenalan dan konfigurasi awal"
-            icon="refresh-outline"
-            onPress={handleRestartOnboarding}
           />
           {state.isDemoMode && (
             <Row
               title="Reset Data Demo"
-              subtitle="Segarkan kembali data contoh untuk simulasi antarmuka"
+              subtitle="Segarkan kembali data contoh"
               icon="flask-outline"
               onPress={handleResetDemo}
             />
@@ -95,15 +75,16 @@ export default function MoreScreen() {
         </Group>
       </Section>
 
-      {/* Footer Info */}
-      <View style={{ alignItems: 'center', paddingVertical: 16, gap: 4 }}>
-        <Txt variant="caption" color={color.ink3} weight="600">
-          KUROSTOP
-        </Txt>
-        <Txt variant="caption" color={color.ink4}>
-          Every Choice Leaves a Mark · v1.0 Local SQLite
+      <View style={styles.footer}>
+        <Txt variant="eyebrow" color={color.ink3}>KuroStop</Txt>
+        <Txt variant="footnote" color={color.ink3} center>
+          Setiap pilihan meninggalkan jejak.
         </Txt>
       </View>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  footer: { alignItems: 'center', gap: 4, paddingVertical: 16 },
+});

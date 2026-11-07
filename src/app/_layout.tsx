@@ -87,7 +87,7 @@ function RootNavigator() {
     return (
       <View testID="db-initializing" style={styles.boot}>
         <Txt variant="headline" color={color.ink2}>KuroStop</Txt>
-        <Txt variant="caption" color={color.ink4} style={{ marginTop: 6 }}>
+        <Txt variant="caption" color={color.ink3} style={{ marginTop: 6 }}>
           Memuat data lokal...
         </Txt>
         <ActivityIndicator color={color.ink3} style={{ marginTop: 18 }} />

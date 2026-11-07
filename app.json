@@ -7,8 +7,8 @@
     "icon": "./assets/images/icon.png",
     "scheme": "kurostop",
     "userInterfaceStyle": "light",
-    "backgroundColor": "#F2F3F0",
-    "primaryColor": "#1C1C1E",
+    "backgroundColor": "#F1F1EC",
+    "primaryColor": "#14161A",
     "ios": {
       "bundleIdentifier": "com.kurostop.personal",
       "supportsTablet": false,
@@ -30,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F2F3F0",
+          "backgroundColor": "#F1F1EC",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
@@ -46,7 +46,7 @@
         "expo-notifications",
         {
           "icon": "./assets/images/icon.png",
-          "color": "#1C1C1E"
+          "color": "#14161A"
         }
       ]
     ],

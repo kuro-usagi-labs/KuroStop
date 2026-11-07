@@ -5,17 +5,17 @@ import { router } from 'expo-router';
 import { useApp } from '@/data/store';
 import { useNow, useToday } from '@/data/hooks';
 import {
-  activeSleep, avgVerified, minutesUntilBedtime, statsForRange, streaks, sum,
+  activeSleep, minutesUntilBedtime, statsForRange, streaks,
 } from '@/data/selectors';
 import type { SleepEntry } from '@/data/types';
 import {
-  clock, duration, durationMin, keyLabel, minutesToClock, stampLabel,
+  clock, duration, durationMin, minutesToClock, stampLabel,
 } from '@/lib/format';
-import { color, radius, space } from '@/theme/tokens';
+import { color, radius } from '@/theme/tokens';
 import {
   EmptyState, Group, Row, Screen, Section, Stat, StatGrid, TextLink,
 } from '@/components/ui/layout';
-import { Badge, Button, Card, Divider, IconButton, Txt } from '@/components/ui/primitives';
+import { Badge, Button, Card, Icon, IconButton, Txt } from '@/components/ui/primitives';
 import { useToast } from '@/components/ui/toast';
 
 export default function SleepScreen() {
@@ -276,9 +276,9 @@ export default function SleepScreen() {
 
       {/* Manual Tracking Transparency Note */}
       <View style={styles.infoBanner}>
-        <IconButton icon="information-circle-outline" label="Info" tone="clear" size={24} iconColor={color.ink3} />
+        <Icon name="information-circle-outline" size={16} color={color.ink3} />
         <Txt variant="footnote" color={color.ink3} style={{ flex: 1 }}>
-          KuroStop tidak menggunakan deteksi tidur otomatis latar belakang. Setiap sesi istirahat dicatat langsung oleh lo agar akurat dan berkesadaran.
+          KuroStop tidak mendeteksi tidur otomatis di latar belakang. Setiap sesi dicatat langsung oleh lo agar akurat.
         </Txt>
       </View>
 

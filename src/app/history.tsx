@@ -2,23 +2,34 @@ import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
-import { useApp } from '@/data/store';
 import { useToday } from '@/data/hooks';
 import {
-  avgVerified, dayStat, statsForRange, streaks, sum,
+  dayStat, statsForRange, streaks,
 } from '@/data/selectors';
 import type { Habit } from '@/data/types';
 import {
-  addDays, clock, dayKey, duration, durationMin, keyLabel, keyParts, monthKey, monthLabel, rangeKeys, relativeDay, rupiah, shiftMonth,
+  addDays, clock, duration, durationMin, keyLabel, keyParts, relativeDay, rupiah,
 } from '@/lib/format';
-import { color, radius, space, zones, type Zone } from '@/theme/tokens';
+import { color, radius, zones, type Zone } from '@/theme/tokens';
 import { Segmented } from '@/components/ui/controls';
 import {
   EmptyState, Group, Row, Screen, Section, Stat, StatGrid,
 } from '@/components/ui/layout';
-import { Badge, Card, Divider, IconButton, PressableScale, Txt } from '@/components/ui/primitives';
+import { Badge, Card, IconButton, PressableScale, Txt } from '@/components/ui/primitives';
 
 type HabitFilter = 'all' | Habit;
+
+const DOW = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+/** Shape carries the zone too, so colour is not the only cue. */
+function zoneShape(zone: Zone) {
+  switch (zone) {
+    case 'warning': return { borderRadius: radius.pill, borderWidth: 1.5 };
+    case 'danger': return { borderRadius: 2 };
+    case 'critical': return { borderRadius: 1, transform: [{ rotate: '45deg' }] };
+    default: return { borderRadius: radius.pill };
+  }
+}
 
 export default function HistoryScreen() {
   const params = useLocalSearchParams<{ habit?: string }>();
@@ -27,7 +38,6 @@ export default function HistoryScreen() {
 
   const [filter, setFilter] = useState<HabitFilter>((params.habit as HabitFilter) || 'all');
   const [selectedKey, setSelectedKey] = useState<string>(today);
-  const [activeMonth, setActiveMonth] = useState<string>(() => monthKey(today));
 
   // Habit filter options
   const filterOptions: { value: HabitFilter; label: string }[] = [
@@ -37,10 +47,10 @@ export default function HistoryScreen() {
     { value: 'sleep', label: 'Tidur' },
   ];
 
-  // 14-day horizontal calendar strip centered around selected date
+  // Seven-day strip ending today. Seven fits one row at every iPhone width.
   const stripKeys = useMemo(() => {
     const keys: string[] = [];
-    for (let i = 13; i >= 0; i--) {
+    for (let i = 6; i >= 0; i--) {
       keys.push(addDays(today, -i));
     }
     return keys;
@@ -88,7 +98,7 @@ export default function HistoryScreen() {
         onChange={setFilter}
       />
 
-      {/* 14-day Calendar Strip */}
+      {/* 7-day Calendar Strip */}
       <Section title="Pilih Hari">
         <Card padded={false}>
           <View style={styles.calendarStrip}>
@@ -98,6 +108,7 @@ export default function HistoryScreen() {
               const isToday = k === today;
               const parts = keyParts(k);
               const zTheme = zones[dStat.zone];
+              const markColor = isSelected ? color.white : zTheme.accent;
 
               return (
                 <PressableScale
@@ -106,17 +117,18 @@ export default function HistoryScreen() {
                   onPress={() => setSelectedKey(k)}
                   style={[
                     styles.dayPill,
+                    isToday && !isSelected && styles.dayPillToday,
                     isSelected && styles.dayPillSelected,
-                    !dStat.verified && styles.dayPillUnverified,
                   ]}
-                  accessibilityLabel={`${keyLabel(k)}, zona ${zTheme.label}`}
+                  accessibilityLabel={`${keyLabel(k)}, ${isToday ? 'hari ini, ' : ''}${dStat.verified ? `zona ${zTheme.label}` : 'tanpa data'}`}
+                  accessibilityState={{ selected: isSelected }}
                 >
                   <Txt
                     variant="caption"
                     color={isSelected ? color.white : color.ink3}
                     weight="600"
                   >
-                    {isToday ? 'Hari Ini' : ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'][parts.dow]}
+                    {DOW[parts.dow]}
                   </Txt>
                   <Txt
                     variant="headline"
@@ -125,15 +137,15 @@ export default function HistoryScreen() {
                   >
                     {parts.day}
                   </Txt>
-                  {/* Zone Dot */}
                   <View
                     style={[
-                      styles.zoneDot,
-                      {
-                        backgroundColor: dStat.verified
-                          ? (isSelected ? color.white : zTheme.accent)
-                          : color.fillStrong,
-                      },
+                      styles.zoneMark,
+                      dStat.verified ? zoneShape(dStat.zone) : null,
+                      dStat.verified
+                        ? (dStat.zone === 'warning'
+                          ? { borderColor: markColor }
+                          : { backgroundColor: markColor })
+                        : { backgroundColor: color.fillStrong },
                     ]}
                   />
                 </PressableScale>
@@ -141,6 +153,22 @@ export default function HistoryScreen() {
             })}
           </View>
         </Card>
+        <View style={styles.legend} accessible accessibilityLabel="Legenda: lingkaran bersih, cincin peringatan, kotak bahaya, belah ketupat kritis">
+          {(['clear', 'warning', 'danger', 'critical'] as Zone[]).map((z) => (
+            <View key={z} style={styles.legendItem}>
+              <View
+                style={[
+                  styles.zoneMark,
+                  zoneShape(z),
+                  z === 'warning'
+                    ? { borderColor: zones[z].accent }
+                    : { backgroundColor: zones[z].accent },
+                ]}
+              />
+              <Txt variant="caption" color={color.ink3}>{zones[z].label}</Txt>
+            </View>
+          ))}
+        </View>
       </Section>
 
       {/* Selected Day Overview */}
@@ -306,35 +334,45 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   calendarStrip: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     padding: 10,
-    gap: 6,
-    justifyContent: 'space-between',
+    gap: 4,
   },
   dayPill: {
-    width: '13%',
+    flex: 1,
     alignItems: 'center',
     paddingVertical: 8,
     borderRadius: radius.sm,
     backgroundColor: color.fill,
     gap: 3,
   },
+  dayPillToday: {
+    borderWidth: 1.5,
+    borderColor: color.ink,
+  },
   dayPillSelected: {
     backgroundColor: color.ink,
   },
-  dayPillUnverified: {
-    opacity: 0.55,
-  },
-  zoneDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+  zoneMark: {
+    width: 8,
+    height: 8,
     marginTop: 2,
+  },
+  legend: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    paddingHorizontal: 2,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
   },
   selectedHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    gap: 10,
   },
   dayStatsRow: {
     flexDirection: 'row',

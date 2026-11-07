@@ -1,29 +1,32 @@
 /**
  * TODAY DASHBOARD — the main screen of KuroStop.
  *
- * Hero: the DaySheet consequence card showing today's zone, accountability
- * messages, ink marks, and a footer with quick summary stats.
- * Below: zone simulator, quick-action buttons, stat grid, streaks, 7-day
- * trend, and navigation cards.
+ * Reading order follows the job of the screen:
+ *   1. Where today stands          → DaySheet (the signature sheet)
+ *   2. What you can do about it    → log actions + urge intervention
+ *   3. The numbers, in one block   → summary metrics
+ *   4. What the week looks like    → seven-day ledger
+ *
+ * Navigation rows were removed: History and Money already live in the
+ * "Lainnya" tab, so repeating them here only added noise.
  */
 import { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { DaySheet, type Mark } from '@/components/consequence/DaySheet';
-import { ProgressBar } from '@/components/ui/controls';
 import {
   Screen, Section, StatGrid, Stat, Group, Row,
 } from '@/components/ui/layout';
 import {
-  Badge, Button, Card, Chip, IconButton, PressableScale, Txt, Icon,
+  Button, Card, IconButton, PressableScale, Txt, Icon,
 } from '@/components/ui/primitives';
 import { useToday } from '@/data/hooks';
 import { accountability, neutralStatus } from '@/data/messages';
 import { statsForRange, streaks as calcStreaks } from '@/data/selectors';
 import { useApp } from '@/data/store';
 import { HABIT_META } from '@/data/types';
-import { durationMin, keyLabel, rupiah, addDays } from '@/lib/format';
+import { durationMin, keyLabel, keyParts, rupiah } from '@/lib/format';
 import { haptic } from '@/lib/haptics';
 import {
   color, radius, space, zones, ZONE_ORDER, type Zone,
@@ -31,6 +34,9 @@ import {
 import { logMilestone } from '@/lib/milestone';
 
 /* ════════════════════════════════════════════════════════════════ */
+
+const DOW = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+const BAR_HEIGHT: Record<Zone, number> = { clear: 8, warning: 14, danger: 20, critical: 26 };
 
 export default function TodayDashboard() {
   // Readiness, database errors and the onboarding gate are handled once by the
@@ -92,25 +98,27 @@ function TodayDashboardContent() {
     [activeHabits, index, settings, today],
   );
 
+  const trendLabel = trend
+    .map((d) => `${keyLabel(d.key, 'short')}: ${d.verified ? `zona ${zones[d.zone].label}` : 'tanpa data'}`)
+    .join('. ');
+
   // ── DaySheet footer ──
   const footerContent = (
     <View
-      style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}
+      style={styles.metrics}
       accessible
       accessibilityLabel={`Ringkasan: ${stat.smoke} batang, ${stat.pmo.sessions} sesi PMO, pengeluaran ${rupiah(stat.spend)}`}
     >
       {settings.habits.smoke ? (
-        <View style={{ alignItems: 'center', gap: 2 }}>
-          <Txt variant="caption" color={zones[zone].sub}>
-            Rokok
-          </Txt>
+        <View style={styles.metric}>
+          <Txt variant="caption" color={zones[zone].sub}>Rokok</Txt>
           <Txt variant="headline" color={zones[zone].text} num>
             {stat.smoke}/{settings.smokeTarget}
           </Txt>
         </View>
       ) : null}
       {settings.habits.pmo ? (
-        <View style={{ alignItems: 'center', gap: 2 }}>
+        <View style={styles.metric}>
           <Txt variant="caption" color={zones[zone].sub}>
             {settings.pmoCover ? 'Refleksi' : 'PMO'}
           </Txt>
@@ -120,27 +128,21 @@ function TodayDashboardContent() {
         </View>
       ) : null}
       {settings.habits.sleep ? (
-        <View style={{ alignItems: 'center', gap: 2 }}>
-          <Txt variant="caption" color={zones[zone].sub}>
-            Tidur
-          </Txt>
+        <View style={styles.metric}>
+          <Txt variant="caption" color={zones[zone].sub}>Tidur</Txt>
           <Txt variant="headline" color={zones[zone].text} num>
             {stat.sleep?.durationMin ? durationMin(stat.sleep.durationMin) : '—'}
           </Txt>
         </View>
       ) : null}
-      <View style={{ alignItems: 'center', gap: 2 }}>
-        <Txt variant="caption" color={zones[zone].sub}>
-          Uang
-        </Txt>
+      <View style={styles.metric}>
+        <Txt variant="caption" color={zones[zone].sub}>Uang</Txt>
         <Txt variant="headline" color={zones[zone].text} num>
           {rupiah(stat.spend, { compact: true })}
         </Txt>
       </View>
     </View>
   );
-
-
 
   return (
     <Screen
@@ -156,27 +158,72 @@ function TodayDashboardContent() {
         />
       }
     >
-      {/* ─── 1. Hero DaySheet ─── */}
+      {/* ─── 1. Hero: where today stands ─── */}
       <Section index={0}>
         <View testID="daysheet-card">
           <DaySheet
-          zone={zone}
-          eyebrow={`ZONA · ${zones[zone].label.toUpperCase()}`}
-          headline={msg.headline}
-          body={msg.body}
-          marks={marks}
-          footer={footerContent}
-          simulated={simulated}
-        />
+            zone={zone}
+            eyebrow={`ZONA · ${zones[zone].label.toUpperCase()}`}
+            headline={msg.headline}
+            body={msg.body}
+            marks={marks}
+            footer={footerContent}
+            simulated={simulated}
+          />
         </View>
       </Section>
 
-      {/* ─── 2. Zone Simulator Strip (Isolate to Demo Mode) ─── */}
+      {/* ─── 2. Actions: log fast, or interrupt an urge ─── */}
+      <Section index={1}>
+        <View style={styles.actions}>
+          {(settings.habits.smoke || settings.habits.pmo) ? (
+            <View style={styles.actionRow}>
+              {settings.habits.smoke ? (
+                <Button
+                  testID="quick-log-smoke"
+                  label="Catat Rokok"
+                  icon="flame-outline"
+                  variant="secondary"
+                  size="md"
+                  onPress={() => router.push('/log?habit=smoke')}
+                  accessibilityHint="Buka form pencatatan rokok"
+                  style={{ flex: 1 }}
+                />
+              ) : null}
+              {settings.habits.pmo ? (
+                <Button
+                  testID="quick-log-pmo"
+                  label="Catat PMO"
+                  icon="eye-off-outline"
+                  variant="secondary"
+                  size="md"
+                  onPress={() => router.push('/log?habit=pmo')}
+                  accessibilityHint="Buka form pencatatan PMO"
+                  style={{ flex: 1 }}
+                />
+              ) : null}
+            </View>
+          ) : null}
+          {/* One prominent action, and it is the one that matters mid-urge.
+              Ink, not vermilion: an urge is not a recorded failure. */}
+          <Button
+            testID="quick-urge"
+            label="Gue Lagi Pengen…"
+            icon="pulse-outline"
+            variant="primary"
+            size="md"
+            onPress={() => router.push('/urge')}
+            accessibilityHint="Buka latihan menahan dorongan"
+          />
+        </View>
+      </Section>
+
+      {/* ─── 3. Demo-only zone simulator ─── */}
       {state.isDemoMode && (
-        <Section index={1}>
+        <Section index={2}>
           <View style={styles.simStrip}>
-            <Txt variant="caption" color={color.ink4} style={{ marginRight: 4 }}>
-              Simulasi:
+            <Txt variant="caption" color={color.ink3} style={{ marginRight: 2 }}>
+              Simulasi
             </Txt>
             {(['auto', ...ZONE_ORDER] as (Zone | 'auto')[]).map((z) => {
               const selected =
@@ -216,7 +263,6 @@ function TodayDashboardContent() {
                     variant="caption"
                     weight="600"
                     color={selected ? color.white : color.ink3}
-                    style={{ fontSize: 11 }}
                   >
                     {label}
                   </Txt>
@@ -227,58 +273,14 @@ function TodayDashboardContent() {
         </Section>
       )}
 
-      {/* ─── 3. Quick Actions ─── */}
-      <Section index={2}>
-        <View style={styles.quickStack}>
-          {(settings.habits.smoke || settings.habits.pmo) ? (
-            <View style={styles.quickRow}>
-              {settings.habits.smoke ? (
-                <Button
-                  testID="quick-log-smoke"
-                  label="Catat Rokok"
-                  icon="flame-outline"
-                  variant="secondary"
-                  size="md"
-                  onPress={() => router.push('/log?habit=smoke')}
-                  accessibilityHint="Buka form pencatatan rokok"
-                  style={{ flex: 1 }}
-                />
-              ) : null}
-              {settings.habits.pmo ? (
-                <Button
-                  testID="quick-log-pmo"
-                  label="Catat PMO"
-                  icon="eye-off-outline"
-                  variant="secondary"
-                  size="md"
-                  onPress={() => router.push('/log?habit=pmo')}
-                  accessibilityHint="Buka form pencatatan PMO"
-                  style={{ flex: 1 }}
-                />
-              ) : null}
-            </View>
-          ) : null}
-          <Button
-            testID="quick-urge"
-            label="Gue Lagi Pengen..."
-            icon="pulse-outline"
-            variant="accent"
-            accent={color.vermilion}
-            size="md"
-            onPress={() => router.push('/urge')}
-            accessibilityHint="Catat dorongan yang sedang dirasakan"
-          />
-        </View>
-      </Section>
-
-      {/* ─── 4. Daily Summary Stats ─── */}
+      {/* ─── 4. One ledger block for today's numbers ─── */}
       <Section title="Ringkasan Hari Ini" index={3}>
         <StatGrid>
           {settings.habits.smoke ? (
             <Stat
               label="Rokok"
               value={`${stat.smoke}`}
-              sub={`Target: ${settings.smokeTarget} batang`}
+              sub={`Target ${settings.smokeTarget} batang`}
               tone={stat.overSmoke > 0 ? color.vermilion : color.ink}
               icon="flame-outline"
             />
@@ -289,8 +291,8 @@ function TodayDashboardContent() {
               value={settings.pmoCover ? (stat.pmo.sessions > 0 ? 'Tercatat' : 'Bersih') : `${stat.pmo.sessions}`}
               sub={
                 settings.pmoCover
-                  ? 'Data tersamarkan (Mode Privasi Aktif)'
-                  : (stat.pmo.sessions > 0 ? `P:${stat.pmo.p} M:${stat.pmo.m} P+M:${stat.pmo.pmo}` : 'Belum ada sesi')
+                  ? 'Data tersamarkan'
+                  : (stat.pmo.sessions > 0 ? `P:${stat.pmo.p} · M:${stat.pmo.m} · P+M:${stat.pmo.pmo}` : 'Belum ada sesi')
               }
               tone={stat.overPmo > 0 ? color.vermilion : color.ink}
               icon="eye-off-outline"
@@ -335,7 +337,7 @@ function TodayDashboardContent() {
                 icon={HABIT_META[s.habit].icon}
                 title={HABIT_META[s.habit].label}
                 value={`${s.current} hari`}
-                subtitle={`Terpanjang: ${s.longest} hari`}
+                subtitle={`Terpanjang ${s.longest} hari`}
                 chevron={false}
               />
             ))}
@@ -343,34 +345,39 @@ function TodayDashboardContent() {
         </Section>
       ) : null}
 
-      {/* ─── 6. 7-Day Trend ─── */}
+      {/* ─── 6. Seven-day ledger ─── */}
       <Section title="7 Hari Terakhir" index={5}>
-        <Card>
-          <View style={styles.trendRow} accessible accessibilityLabel="Tren 7 hari terakhir berdasarkan zona">
+        <Card padded={false}>
+          <View
+            style={styles.trendRow}
+            accessible
+            accessibilityLabel={`Tren tujuh hari. ${trendLabel}`}
+          >
             {trend.map((d) => {
               const z = zones[d.zone];
-              const label = keyLabel(d.key, 'tiny');
               const isToday = d.key === today;
+              const h = d.verified ? BAR_HEIGHT[d.zone] : 8;
               return (
                 <View key={d.key} style={styles.trendItem}>
-                  <View
-                    style={[
-                      styles.trendDot,
-                      {
-                        backgroundColor: d.verified ? z.accent : color.fill,
-                        borderColor: d.verified ? z.accent : color.fillStrong,
-                      },
-                      isToday && styles.trendDotToday,
-                    ]}
-                    accessibilityLabel={`${label}: zona ${z.label}`}
-                  />
+                  <View style={[styles.trendTrack, isToday && styles.trendTrackToday]}>
+                    <View
+                      style={[
+                        styles.trendBar,
+                        {
+                          height: h,
+                          backgroundColor: d.verified ? z.accent : 'transparent',
+                          borderWidth: d.verified ? 0 : 1,
+                          borderColor: color.fillStrong,
+                        },
+                      ]}
+                    />
+                  </View>
                   <Txt
                     variant="caption"
-                    color={isToday ? color.ink : color.ink4}
+                    color={isToday ? color.ink : color.ink3}
                     weight={isToday ? '700' : '500'}
-                    style={{ fontSize: 10 }}
                   >
-                    {label}
+                    {isToday ? 'Hari' : DOW[keyParts(d.key).dow]}
                   </Txt>
                 </View>
               );
@@ -379,23 +386,13 @@ function TodayDashboardContent() {
         </Card>
       </Section>
 
-      {/* ─── 7. Navigation Cards ─── */}
-      <Section index={6}>
-        <Group>
-          <Row
-            icon="bar-chart-outline"
-            title="Riwayat & Statistik"
-            subtitle="Lihat tren dan data harian"
-            onPress={() => router.push('/history')}
-          />
-          <Row
-            icon="wallet-outline"
-            title="Uang & Pengeluaran"
-            subtitle="Lacak biaya kebiasaan"
-            onPress={() => router.push('/money')}
-          />
-        </Group>
-      </Section>
+      {/* Legend is text, so zone is never carried by colour alone. */}
+      <View style={styles.legend} accessible accessibilityLabel="Legenda: tinggi batang menunjukkan tingkat zona dari bersih ke kritis">
+        <Icon name="information-circle-outline" size={14} color={color.ink3} />
+        <Txt variant="footnote" color={color.ink3} style={{ flex: 1 }}>
+          Tinggi batang menunjukkan zona harian: rendah = bersih, tinggi = kritis. Hari tanpa data tampil kosong.
+        </Txt>
+      </View>
     </Screen>
   );
 }
@@ -403,6 +400,10 @@ function TodayDashboardContent() {
 /* ════════════════════════════════════════════════════════════════ */
 
 const styles = StyleSheet.create({
+  actions: { gap: space.xs },
+  actionRow: { flexDirection: 'row', gap: space.xs },
+  metrics: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
+  metric: { alignItems: 'center', gap: 2 },
   simStrip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -414,45 +415,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 6,
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: color.fillStrong,
     backgroundColor: color.sheet,
   },
-  simDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  quickStack: {
-    gap: 8,
-  },
-  quickRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
+  simDot: { width: 7, height: 7, borderRadius: 4 },
   trendRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     gap: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
-  trendItem: {
+  trendItem: { alignItems: 'center', gap: 6, flex: 1 },
+  trendTrack: {
+    height: 30,
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: 6,
-    flex: 1,
+    paddingBottom: 1,
   },
-  trendDot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 1.5,
+  trendTrackToday: {
+    borderBottomWidth: 1.5,
+    borderBottomColor: color.ink,
   },
-  trendDotToday: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2.5,
-  },
+  trendBar: { width: 8, borderRadius: 4 },
+  legend: { flexDirection: 'row', gap: 6, alignItems: 'flex-start', paddingHorizontal: 2 },
 });

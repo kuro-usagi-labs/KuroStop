@@ -8,12 +8,12 @@ import {
 } from '@/data/selectors';
 import { SMOKE_TRIGGERS, type SmokeEntry, type SmokeTrigger } from '@/data/types';
 import { clock, decimal, rangeKeys } from '@/lib/format';
-import { color, radius, space } from '@/theme/tokens';
+import { color } from '@/theme/tokens';
 import { ProgressBar } from '@/components/ui/controls';
 import {
   EmptyState, Row, Group, Screen, Section, Stat, StatGrid, TextLink,
 } from '@/components/ui/layout';
-import { Card, Divider, IconButton, Txt } from '@/components/ui/primitives';
+import { Card, IconButton, Txt } from '@/components/ui/primitives';
 
 const TRIGGER_MAP = new Map(SMOKE_TRIGGERS.map((t) => [t.value, t.label]));
 
@@ -108,7 +108,7 @@ export default function SmokeScreen() {
                     <Txt variant="hero" color={stat.smoke > s.smokeTarget ? color.vermilion : color.ink}>
                       {stat.smoke}
                     </Txt>
-                    <Txt variant="title" color={color.ink4} style={{ marginBottom: 6 }}>
+                    <Txt variant="title" color={color.ink3} style={{ marginBottom: 6 }}>
                       /{s.smokeTarget}
                     </Txt>
                   </View>
@@ -233,7 +233,7 @@ export default function SmokeScreen() {
                   subtitle={entry.trigger ? (TRIGGER_MAP.get(entry.trigger) ?? entry.trigger) : undefined}
                   value={`${entry.qty} btg`}
                   icon="flame-outline"
-                  onPress={() => {}}
+                  chevron={false}
                 />
               ))}
             </Group>
@@ -266,6 +266,6 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     alignItems: 'center',
-    paddingVertical: space.sm,
+    paddingVertical: 12,
   },
 });

@@ -2,13 +2,13 @@
  * Derived statistics for the UI.
  * Connects the UI layer to the deterministic domain calculation engines.
  */
-import { addDays, dayKey, keyStart, minutesOfDay, rangeKeys } from '@/lib/format';
+import { dayKey, keyStart, minutesOfDay, rangeKeys } from '@/lib/format';
 import type { Zone } from '@/theme/tokens';
 import { calculateDailyZone } from '@/domain/consequence';
 import { calculateDailyBaselineCost } from '@/domain/finance';
 import { calculateStreak } from '@/domain/streaks';
 import type {
-  Entry, Habit, PmoEntry, PurchaseEntry, Sensitivity, Settings, SleepEntry, SmokeEntry, UrgeEntry,
+  Entry, Habit, PmoEntry, PurchaseEntry, Settings, SleepEntry, SmokeEntry, UrgeEntry,
 } from './types';
 
 export type DayIndex = Map<string, Entry[]>;

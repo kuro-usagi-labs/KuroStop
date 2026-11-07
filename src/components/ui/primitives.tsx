@@ -21,10 +21,15 @@ export type TxtProps = TextProps & {
   weight?: TextStyle['fontWeight'];
 };
 
+/**
+ * Every label scales with Dynamic Type. Display sizes are capped lower because
+ * they are already large; body and caption text reach 200% as the HIG asks.
+ * Never lower these caps to make a layout fit — fix the layout instead.
+ */
 export function Txt({ variant = 'body', color: c = color.ink, num, center, weight, style, ...rest }: TxtProps) {
   return (
     <Text
-      maxFontSizeMultiplier={variant === 'hero' || variant === 'display' ? 1.3 : 1.8}
+      maxFontSizeMultiplier={variant === 'hero' || variant === 'display' ? 1.6 : 2}
       {...rest}
       style={[
         type[variant],
@@ -116,7 +121,7 @@ export function Button({
     inverse: { bg: color.white, fg: color.ink },
   };
   const p = palette[variant];
-  const h_ = size === 'lg' ? 56 : size === 'md' ? 48 : 36;
+  const minHeight = size === 'lg' ? 52 : size === 'md' ? 46 : 40;
   return (
     <PressableScale
       testID={testID}
@@ -128,17 +133,23 @@ export function Button({
       style={[
         styles.btn,
         {
-          minHeight: Math.max(h_, size === 'sm' ? 36 : HIT),
+          minHeight,
           backgroundColor: p.bg,
           borderColor: p.border ?? 'transparent',
-          borderWidth: p.border ? 1.5 : 0,
-          paddingHorizontal: size === 'sm' ? 14 : 20,
-          borderRadius: size === 'sm' ? radius.pill : radius.md,
+          borderWidth: p.border ? 1 : 0,
+          paddingHorizontal: size === 'sm' ? 14 : 18,
+          paddingVertical: size === 'lg' ? 14 : 10,
+          borderRadius: radius.md,
         },
         style,
       ]}>
-      {icon ? <Icon name={icon} size={size === 'sm' ? 16 : 20} color={p.fg} /> : null}
-      <Txt variant={size === 'sm' ? 'footnote' : 'headline'} weight="600" color={p.fg} numberOfLines={1}>
+      {icon ? <Icon name={icon} size={size === 'sm' ? 17 : 19} color={p.fg} /> : null}
+      <Txt
+        variant={size === 'sm' ? 'footnote' : 'headline'}
+        weight="600"
+        color={p.fg}
+        center
+        numberOfLines={2}>
         {label}
       </Txt>
     </PressableScale>
@@ -165,7 +176,7 @@ export function IconButton({
       accessibilityLabel={label}
       hitSlop={size < HIT ? (HIT - size) / 2 : 0}
       style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: bg, alignItems: 'center', justifyContent: 'center' }}>
-      <Icon name={icon} size={Math.round(size * 0.48)} color={fg} />
+      <Icon name={icon} size={Math.round(size * 0.46)} color={fg} />
     </PressableScale>
   );
 }
@@ -173,7 +184,7 @@ export function IconButton({
 /* ───────────────────────── Surfaces ───────────────────────── */
 
 export function Card({ children, style, padded = true }: { children: ReactNode; style?: StyleProp<ViewStyle>; padded?: boolean }) {
-  return <View style={[styles.card, padded && { padding: 18 }, style]}>{children}</View>;
+  return <View style={[styles.card, padded && { padding: 16 }, style]}>{children}</View>;
 }
 
 export function Divider({ inset = 0, style }: { inset?: number; style?: StyleProp<ViewStyle> }) {
@@ -208,7 +219,7 @@ export function Badge({ label, fg = color.ink2, bg = color.fill, icon }: { label
   return (
     <View style={[styles.badge, { backgroundColor: bg }]}>
       {icon ? <Icon name={icon} size={12} color={fg} /> : null}
-      <Txt variant="caption" weight="700" color={fg} style={{ letterSpacing: 0.4 }}>
+      <Txt variant="caption" weight="700" color={fg} style={{ letterSpacing: 0.4 }} numberOfLines={1}>
         {label}
       </Txt>
     </View>
@@ -219,15 +230,20 @@ const styles = StyleSheet.create({
   num: { fontVariant: ['tabular-nums'] },
   center: { textAlign: 'center' },
   btn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  card: { backgroundColor: color.sheet, borderRadius: radius.lg },
+  card: {
+    backgroundColor: color.sheet,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hair,
+  },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    minHeight: 36,
+    minHeight: 40,
     paddingHorizontal: 14,
     borderRadius: radius.pill,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: color.fillStrong,
     backgroundColor: color.sheet,
   },
@@ -236,7 +252,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: radius.pill,
     alignSelf: 'flex-start',
   },

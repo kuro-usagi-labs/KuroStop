@@ -1,17 +1,22 @@
+/**
+ * MONEY — what the habit costs, and what stopping would keep.
+ *
+ * Reading order: the one number that matters (saved this month), the action
+ * that keeps the ledger honest (record a purchase), then the supporting
+ * arithmetic. Savings are shown as a range, never as a promise.
+ */
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { useToday } from '@/data/hooks';
 import {
-  baselineDaily, entriesInRange, statsForRange, sum,
+  baselineDaily, statsForRange, sum,
 } from '@/data/selectors';
 import { calculateEligiblePeriodBaseline } from '@/domain/finance';
 import type { PurchaseEntry } from '@/data/types';
-import {
-  clock, decimal, rangeKeys, relativeDay, rupiah, stampLabel,
-} from '@/lib/format';
-import { color, radius, space } from '@/theme/tokens';
+import { rangeKeys, rupiah, stampLabel } from '@/lib/format';
+import { color } from '@/theme/tokens';
 import {
   EmptyState, Group, Row, Screen, Section, Stat, StatGrid,
 } from '@/components/ui/layout';
@@ -24,6 +29,7 @@ export default function MoneyScreen() {
   // ─── baseline math ─────────────────────────────────────────
   // Daily baseline: baselinePerDay * (packPrice / packSize)
   const dailyBase = useMemo(() => baselineDaily(s), [s]);
+  const pricePerStick = s.packSize > 0 ? s.packPrice / s.packSize : 0;
   const weekKeys = useMemo(() => rangeKeys(today, 7), [today]);
   const monthKeys = useMemo(() => rangeKeys(today, 30), [today]);
 
@@ -57,9 +63,11 @@ export default function MoneyScreen() {
   }, [index]);
 
   // ─── future savings projection ─────────────────────────────
-  const savings3mo = dailyBase * 90;
-  const savings6mo = dailyBase * 180;
-  const savings1yr = dailyBase * 365;
+  const projection = [
+    { label: '3 bulan', value: dailyBase * 90 },
+    { label: '6 bulan', value: dailyBase * 180 },
+    { label: '1 tahun', value: dailyBase * 365 },
+  ];
 
   const isSaving = monthSaved >= 0;
 
@@ -68,142 +76,120 @@ export default function MoneyScreen() {
       title="Keuangan"
       eyebrow="PENGELUARAN & TABUNGAN"
       hasTabBar={false}
-      right={
-        <IconButton
-          icon="close"
-          label="Tutup"
-          tone="fill"
-          onPress={() => router.back()}
-        />
-      }
+      right={<IconButton icon="close" label="Tutup" tone="fill" onPress={() => router.back()} />}
     >
-      {/* Hero Financial Card */}
-      <Card>
-        <View style={{ gap: 14 }}>
-          <View style={styles.heroRow}>
-            <View style={{ gap: 2, flex: 1 }}>
-              <Txt variant="footnote" color={color.ink3}>Estimasi Tabungan (30 Hari Terakhir)</Txt>
-              <Txt variant="hero" color={isSaving ? color.jade : color.vermilion}>
-                {rupiah(monthSaved, { compact: true })}
-              </Txt>
-              <Txt variant="subhead" color={color.ink2}>
-                {isSaving
-                  ? `Uang yang berhasil diselamatkan dibandingkan batas baseline (${s.baselinePerDay} btg/hari)`
-                  : `Pengeluaran riil melebihi baseline (${s.baselinePerDay} btg/hari) sebesar ${rupiah(Math.abs(monthSaved))}`}
-              </Txt>
-            </View>
-            <Badge
-              label={isSaving ? 'HEMAT' : 'DEFISIT'}
-              fg={isSaving ? color.jade : color.vermilion}
-              bg={isSaving ? color.jadeTint : color.vermilionTint}
-            />
+      {/* ─── The headline number ─── */}
+      <Card style={styles.hero}>
+        <View style={styles.heroTop}>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Txt variant="eyebrow" color={color.ink3}>Tabungan 30 Hari Terakhir</Txt>
+            <Txt variant="hero" num color={isSaving ? color.jade : color.vermilion}>
+              {rupiah(monthSaved, { compact: true })}
+            </Txt>
+            <Txt variant="subhead" color={color.ink3}>
+              {isSaving
+                ? `Di bawah baseline ${s.baselinePerDay} btg/hari`
+                : `Melebihi baseline ${s.baselinePerDay} btg/hari sebesar ${rupiah(Math.abs(monthSaved))}`}
+            </Txt>
           </View>
+          <Badge
+            label={isSaving ? 'HEMAT' : 'DEFISIT'}
+            fg={isSaving ? color.jade : color.vermilion}
+            bg={isSaving ? color.jadeTint : color.vermilionTint}
+          />
+        </View>
 
-          <Divider />
+        <Divider />
 
-          <View style={styles.summarySplit}>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Txt variant="caption" color={color.ink3}>TOTAL BELANJA (30 HARI)</Txt>
-              <Txt variant="title2" weight="700" color={color.vermilion}>
-                {rupiah(monthActualSpend)}
-              </Txt>
-            </View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Txt variant="caption" color={color.ink3}>BASELINE (30 HARI)</Txt>
-              <Txt variant="title2" weight="700" color={color.ink3}>
-                {rupiah(monthBaselineSpend)}
-              </Txt>
-            </View>
+        <View style={styles.split}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Txt variant="eyebrow" color={color.ink3}>Belanja Riil</Txt>
+            <Txt variant="title2" weight="600" num>{rupiah(monthActualSpend)}</Txt>
+          </View>
+          <View style={styles.splitCell}>
+            <Txt variant="eyebrow" color={color.ink3}>Baseline</Txt>
+            <Txt variant="title2" weight="600" num color={color.ink3}>{rupiah(monthBaselineSpend)}</Txt>
           </View>
         </View>
       </Card>
 
-      {/* Quick Action Button */}
+      {/* ─── The one action on this screen ─── */}
       <Button
-        label="Catat Pembelian Rokok"
+        label="Catat Pembelian"
         icon="cart-outline"
-        variant="secondary"
         onPress={() => router.push('/log?habit=purchase')}
+        accessibilityHint="Buka form pencatatan pembelian rokok"
       />
 
-      {/* Periodic Breakdown */}
-      <Section title="Perbandingan Pengeluaran">
+      {/* ─── Supporting numbers ─── */}
+      <Section title="Ringkasan" index={0}>
         <StatGrid>
           <Stat
-            label="Belanja Hari Ini"
+            label="Hari Ini"
             value={rupiah(stat.spend)}
-            sub={stat.spend === 0 ? 'Belum ada pembelian hari ini' : `${stat.purchases} kali transaksi`}
+            sub={stat.spend === 0 ? 'Belum ada pembelian' : `${stat.purchases} transaksi`}
             tone={stat.spend === 0 ? color.jade : color.ink}
             icon="today-outline"
           />
           <Stat
-            label="Belanja 7 Hari"
+            label="7 Hari"
             value={rupiah(weekActualSpend)}
-            sub={`Hemat ${rupiah(weekSaved, { compact: true })} dari baseline`}
+            sub={weekSaved >= 0 ? `Hemat ${rupiah(weekSaved, { compact: true })}` : `Lebih ${rupiah(Math.abs(weekSaved), { compact: true })}`}
+            tone={weekSaved < 0 ? color.vermilion : color.ink}
             icon="calendar-outline"
           />
           <Stat
             label="Baseline Harian"
             value={rupiah(dailyBase)}
-            sub={`${s.baselinePerDay} batang @ ${rupiah(s.packPrice / s.packSize)}`}
+            sub={`${s.baselinePerDay} batang`}
             icon="calculator-outline"
           />
           <Stat
-            label="Baseline (30 Hari)"
-            value={rupiah(monthBaselineSpend)}
-            sub="Ekspektasi pengeluaran periode ini"
-            icon="trending-up-outline"
+            label="Harga per Batang"
+            value={rupiah(pricePerStick)}
+            sub={`${rupiah(s.packPrice, { compact: true })} / ${s.packSize} btg`}
+            icon="pricetag-outline"
           />
         </StatGrid>
       </Section>
 
-      {/* Projection of Potential Savings */}
-      <Section title="Proyeksi Tabungan Masa Depan (Hipotetis)">
-        <Card>
-          <View style={{ gap: 12 }}>
-            <Txt variant="subhead" color={color.ink2}>
-              Bila lo sama sekali tidak merokok dari titik ini, estimasi tabungan hipotetis dibandingkan baseline:
+      {/* ─── Projection, clearly framed as hypothetical ─── */}
+      <Section title="Proyeksi Hipotetis" index={1}>
+        <Card padded={false}>
+          <View style={styles.projection}>
+            {projection.map((p, i) => (
+              <View key={p.label} style={[styles.projectionCell, i > 0 && styles.projectionDivider]}>
+                <Txt variant="eyebrow" color={color.ink3}>{p.label}</Txt>
+                <Txt variant="title2" weight="600" num>{rupiah(p.value, { compact: true })}</Txt>
+              </View>
+            ))}
+          </View>
+          <View style={styles.projectionFoot}>
+            <Txt variant="footnote" color={color.ink3}>
+              Bila konsumsi berhenti dari titik ini, dibandingkan baseline {s.baselinePerDay} btg/hari.
             </Txt>
-            <View style={styles.projectionGrid}>
-              <View style={styles.projectionBox}>
-                <Txt variant="caption" color={color.ink3}>3 BULAN</Txt>
-                <Txt variant="headline" weight="700" color={color.jade}>
-                  {rupiah(savings3mo, { compact: true })}
-                </Txt>
-              </View>
-              <View style={styles.projectionBox}>
-                <Txt variant="caption" color={color.ink3}>6 BULAN</Txt>
-                <Txt variant="headline" weight="700" color={color.jade}>
-                  {rupiah(savings6mo, { compact: true })}
-                </Txt>
-              </View>
-              <View style={styles.projectionBox}>
-                <Txt variant="caption" color={color.ink3}>1 TAHUN</Txt>
-                <Txt variant="headline" weight="700" color={color.jade}>
-                  {rupiah(savings1yr, { compact: true })}
-                </Txt>
-              </View>
-            </View>
           </View>
         </Card>
       </Section>
 
-      {/* Recent Purchases List */}
-      <Section title="Riwayat Pembelian Terakhir">
+      {/* ─── Ledger of purchases ─── */}
+      <Section title="Pembelian Terakhir" index={2}>
         {recentPurchases.length === 0 ? (
           <EmptyState
             icon="receipt-outline"
-            title="Belum Ada Transaksi"
-            body="Saat lo membeli rokok (bungkus atau eceran), catat di sini agar neraca pengeluaran tetap jujur."
+            title="Belum ada transaksi"
+            body="Saat lo membeli rokok, catat di sini agar neraca pengeluaran tetap jujur."
           />
         ) : (
           <Group>
             {recentPurchases.map((e) => (
               <Row
                 key={e.id}
-                title={`${rupiah(e.price)}`}
-                subtitle={`${e.qty} ${e.unit}${e.brand ? ` (${e.brand})` : ''} · ${stampLabel(e.at)}`}
-                icon="cash-outline"
+                title={`${e.qty} ${e.unit}${e.brand ? ` · ${e.brand}` : ''}`}
+                subtitle={stampLabel(e.at)}
+                value={rupiah(e.price)}
+                icon="receipt-outline"
+                chevron={false}
               />
             ))}
           </Group>
@@ -214,25 +200,21 @@ export default function MoneyScreen() {
 }
 
 const styles = StyleSheet.create({
-  heroRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  summarySplit: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  projectionGrid: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 4,
-  },
-  projectionBox: {
+  hero: { gap: 14 },
+  heroTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  split: { flexDirection: 'row', gap: 16 },
+  splitCell: {
     flex: 1,
-    backgroundColor: color.fill,
-    padding: 12,
-    borderRadius: radius.sm,
-    gap: 4,
+    gap: 2,
+    paddingLeft: 16,
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderLeftColor: color.hair,
   },
+  projection: { flexDirection: 'row' },
+  projectionCell: { flex: 1, padding: 14, gap: 4 },
+  projectionDivider: {
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderLeftColor: color.hair,
+  },
+  projectionFoot: { paddingHorizontal: 14, paddingBottom: 14 },
 });

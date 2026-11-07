@@ -1,12 +1,11 @@
-import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { useApp } from '@/data/store';
 import { SAMPLE_BY_INTENSITY } from '@/data/messages';
 import type { Intensity, MotionPref, Sensitivity } from '@/data/types';
-import { minutesToClock, rupiah } from '@/lib/format';
-import { color, space } from '@/theme/tokens';
+import { rupiah } from '@/lib/format';
+import { color } from '@/theme/tokens';
 import { ClockStepper, Segmented, Stepper, Toggle } from '@/components/ui/controls';
 import {
   Group, Row, Screen, Section,
@@ -15,7 +14,7 @@ import { Card, IconButton, Txt } from '@/components/ui/primitives';
 import { useToast } from '@/components/ui/toast';
 import { authenticateAsync } from '@/lib/biometrics';
 import { requestNotificationPermission, syncNotificationSchedules } from '@/lib/notifications';
-import { createBackup, restoreBackup, validateBackup } from '@/lib/backup';
+import { createBackup } from '@/lib/backup';
 
 export default function SettingsScreen() {
   const { state, actions } = useApp();
@@ -505,7 +504,7 @@ export default function SettingsScreen() {
         <Txt variant="caption" color={color.ink3} weight="600">
           KUROSTOP · EVERY CHOICE LEAVES A MARK
         </Txt>
-        <Txt variant="caption" color={color.ink4}>
+        <Txt variant="caption" color={color.ink3}>
           Versi 1.0 (Offline-First SQLite) · Waktu Lokal Asia/Jakarta (UTC+7)
         </Txt>
       </View>

@@ -8,11 +8,11 @@ import {
 } from '@/data/selectors';
 import { PMO_LABEL, PMO_TRIGGERS, type PmoEntry, type PmoTrigger } from '@/data/types';
 import { clock, decimal, rangeKeys } from '@/lib/format';
-import { color, radius, space } from '@/theme/tokens';
+import { color, radius } from '@/theme/tokens';
 import {
   EmptyState, Group, Row, Screen, Section, Stat, StatGrid, TextLink,
 } from '@/components/ui/layout';
-import { Badge, Card, Divider, IconButton, Txt } from '@/components/ui/primitives';
+import { Badge, Card, Icon, IconButton, Txt } from '@/components/ui/primitives';
 
 const TRIGGER_MAP = new Map(PMO_TRIGGERS.map((t) => [t.value, t.label]));
 
@@ -85,14 +85,14 @@ export default function PmoScreen() {
       }
     >
       {/* Privacy Notice */}
-      <View style={styles.privacyCard}>
+      <Card style={styles.privacyCard}>
         <View style={styles.privacyIcon}>
-          <IconButton icon="lock-closed-outline" label="Privat" tone="clear" size={24} iconColor={color.ink2} />
+          <Icon name="lock-closed-outline" size={15} color={color.ink2} />
         </View>
         <Txt variant="footnote" color={color.ink3} style={{ flex: 1 }}>
-          Data pelacakan PMO bersifat sepenuhnya privat. Seluruh data hanya diproses dan disimpan di perangkat ini.
+          Data pelacakan PMO sepenuhnya privat. Semua diproses dan disimpan di perangkat ini.
         </Txt>
-      </View>
+      </Card>
 
       {!hasAny ? (
         <EmptyState
@@ -155,16 +155,19 @@ export default function PmoScreen() {
                 </Txt>
                 <View style={styles.breakdownGrid}>
                   <View style={styles.breakdownItem}>
-                    <Txt variant="caption" color={color.ink3}>{PMO_LABEL.p.short} (Hanya Pornografi)</Txt>
-                    <Txt variant="title2" weight="700">{breakdown.p}</Txt>
+                    <Txt variant="eyebrow" color={color.ink3}>{PMO_LABEL.p.short}</Txt>
+                    <Txt variant="title2" weight="700" num>{breakdown.p}</Txt>
+                    <Txt variant="footnote" color={color.ink3}>Pornografi</Txt>
                   </View>
                   <View style={styles.breakdownItem}>
-                    <Txt variant="caption" color={color.ink3}>{PMO_LABEL.m.short} (Hanya Masturbasi)</Txt>
-                    <Txt variant="title2" weight="700">{breakdown.m}</Txt>
+                    <Txt variant="eyebrow" color={color.ink3}>{PMO_LABEL.m.short}</Txt>
+                    <Txt variant="title2" weight="700" num>{breakdown.m}</Txt>
+                    <Txt variant="footnote" color={color.ink3}>Masturbasi</Txt>
                   </View>
                   <View style={styles.breakdownItem}>
-                    <Txt variant="caption" color={color.ink3}>{PMO_LABEL.pmo.short} (Sesi Gabungan)</Txt>
-                    <Txt variant="title2" weight="700">{breakdown.pmo}</Txt>
+                    <Txt variant="eyebrow" color={color.ink3}>{PMO_LABEL.pmo.short}</Txt>
+                    <Txt variant="title2" weight="700" num>{breakdown.pmo}</Txt>
+                    <Txt variant="footnote" color={color.ink3}>Gabungan</Txt>
                   </View>
                 </View>
               </View>
@@ -249,11 +252,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: color.sheet,
-    padding: 14,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: color.hair,
   },
   privacyIcon: {
     width: 32,

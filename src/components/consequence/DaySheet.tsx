@@ -66,7 +66,7 @@ const InkBlot = memo(function InkBlot({
 
 /* ───────────────────────── Zone seal (hanko-style stamp) ───────────────────────── */
 
-export function ZoneSeal({ zone, size = 84 }: { zone: Zone; size?: number }) {
+export function ZoneSeal({ zone, size = 72 }: { zone: Zone; size?: number }) {
   const rm = useReduceMotion();
   const z = zones[zone];
   const scale = useSharedValue(1);
@@ -93,9 +93,9 @@ export function ZoneSeal({ zone, size = 84 }: { zone: Zone; size?: number }) {
       accessibilityRole="text"
       accessibilityLabel={`Zona saat ini: ${z.label}`}
       style={[{ width: size, height: size, borderRadius: size / 2, borderWidth: 2.5, borderColor: z.accent, alignItems: 'center', justifyContent: 'center' }, aStyle]}>
-      <View style={{ position: 'absolute', width: size - 10, height: size - 10, borderRadius: size, borderWidth: 1, borderColor: z.accent, opacity: 0.6, borderStyle: 'dashed' }} />
-      <Txt variant="caption" weight="700" color={z.accent} style={{ fontSize: 9, letterSpacing: 1.6 }}>ZONA</Txt>
-      <Txt variant="footnote" weight="800" color={z.accent} style={{ letterSpacing: 0.8, fontSize: zone === 'clear' || zone === 'danger' ? 13 : 14 }}>
+      <View style={{ position: 'absolute', width: size - 8, height: size - 8, borderRadius: size, borderWidth: 1, borderColor: z.accent, opacity: 0.55, borderStyle: 'dashed' }} />
+      <Txt variant="caption" weight="700" color={z.accent} style={{ fontSize: 11, letterSpacing: 1.4 }}>ZONA</Txt>
+      <Txt variant="footnote" weight="700" color={z.accent} style={{ letterSpacing: 0.6, fontSize: 13 }}>
         {z.stamp}
       </Txt>
     </Animated.View>
@@ -144,20 +144,20 @@ export function DaySheet({
       </View>
 
       <View style={styles.top}>
-        <View style={{ flex: 1, gap: 4 }}>
+        <View style={{ flex: 1, gap: 6 }}>
           <Txt variant="eyebrow" color={z.sub}>{eyebrow}</Txt>
           {simulated ? (
             <View style={[styles.sim, { borderColor: z.sub }]}>
-              <Txt variant="caption" weight="700" color={z.sub} style={{ fontSize: 10, letterSpacing: 0.8 }}>SIMULASI</Txt>
+              <Txt variant="caption" weight="700" color={z.sub} style={{ fontSize: 11, letterSpacing: 0.6 }}>SIMULASI</Txt>
             </View>
           ) : null}
         </View>
         <ZoneSeal zone={zone} />
       </View>
 
-      <View style={{ gap: 8, marginTop: 6 }} accessible accessibilityRole="summary" accessibilityLabel={`${headline} ${body}`}>
+      <View style={{ gap: 6, marginTop: 2 }} accessible accessibilityRole="summary" accessibilityLabel={`${headline}. ${body}`}>
         <Txt variant="title" color={z.text}>{headline}</Txt>
-        <Txt variant="callout" color={z.sub}>{body}</Txt>
+        <Txt variant="subhead" color={z.sub}>{body}</Txt>
       </View>
 
       <View style={styles.tally} accessible accessibilityLabel={`${marks.length} tanda tercatat hari ini`}>
@@ -179,10 +179,10 @@ export function DaySheet({
 }
 
 const styles = StyleSheet.create({
-  sheet: { borderRadius: radius.xl, padding: 20, gap: 14, ...shadow.sheet, minHeight: 300 },
-  top: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  sim: { alignSelf: 'flex-start', borderWidth: 1, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 1, borderStyle: 'dashed' },
+  sheet: { borderRadius: radius.xl, padding: 18, gap: 12, ...shadow.sheet, minHeight: 250 },
+  top: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  sim: { alignSelf: 'flex-start', borderWidth: 1, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, borderStyle: 'dashed' },
   tally: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 'auto' },
-  tick: { width: 10, height: 10, borderRadius: 5 },
+  tick: { width: 8, height: 8, borderRadius: 4 },
   footer: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 12, flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
 });

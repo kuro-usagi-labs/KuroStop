@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { logMilestone } from '@/lib/milestone';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '@/data/store';
 import { SAMPLE_BY_INTENSITY } from '@/data/messages';
 import { DEFAULT_SETTINGS, type Habit, type Intensity, type Settings } from '@/data/types';
-import { minutesToClock, rupiah } from '@/lib/format';
+import { rupiah } from '@/lib/format';
 import { haptic } from '@/lib/haptics';
-import { color, radius, space } from '@/theme/tokens';
+import { color, gutter, radius } from '@/theme/tokens';
 import { ClockStepper, Stepper, Toggle } from '@/components/ui/controls';
 import { useToast } from '@/components/ui/toast';
-import { Button, Card, Divider, IconButton, PressableScale, Txt } from '@/components/ui/primitives';
+import { Button, Card, Divider, Icon, IconButton, PressableScale, Txt, type IconName } from '@/components/ui/primitives';
 
 /**
  * Onboarding wizard.
@@ -137,7 +137,12 @@ export default function OnboardingScreen() {
       </View>
 
       {/* Main Content Area */}
-      <View style={styles.content}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingTop: 12 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* ─── Step 0: Welcome ─────────────────────────── */}
         {step === 0 && (
           <View style={styles.stepContainer}>
@@ -145,7 +150,7 @@ export default function OnboardingScreen() {
               <View style={styles.appIconPlaceholder}>
                 <Txt variant="hero" color={color.white}>K</Txt>
               </View>
-              <Txt variant="display" center weight="800" testID="welcome-title">KuroStop</Txt>
+              <Txt variant="display" center weight="700" testID="welcome-title">KuroStop</Txt>
               <Txt variant="headline" color={color.ink2} center weight="600">
                 Every Choice Leaves a Mark.
               </Txt>
@@ -155,7 +160,7 @@ export default function OnboardingScreen() {
             </View>
 
             <View style={{ marginTop: 'auto', gap: 10 }}>
-              <Txt variant="footnote" color={color.ink4} center>
+              <Txt variant="footnote" color={color.ink3} center>
                 Tanpa registrasi. Tanpa akun. Data lo milik lo sendiri.
               </Txt>
               <Button
@@ -166,7 +171,7 @@ export default function OnboardingScreen() {
               />
               <Button
                 label="Gunakan Pengaturan Standar"
-                variant="secondary"
+                variant="ghost"
                 testID="onboarding-quick-setup-btn"
                 onPress={handleQuickStart}
                 disabled={busy}
@@ -180,7 +185,7 @@ export default function OnboardingScreen() {
           <View style={styles.stepContainer}>
             <View style={{ gap: 6 }}>
               <Txt variant="eyebrow" color={color.ink3}>LANGKAH 1 DARI 4</Txt>
-              <Txt variant="title" weight="700">Apa yang mau lo kelola?</Txt>
+              <Txt variant="display">Apa yang mau lo kelola?</Txt>
               <Txt variant="callout" color={color.ink3}>
                 Pilih satu atau lebih kebiasaan yang ingin lo disiplinkan.
               </Txt>
@@ -225,7 +230,7 @@ export default function OnboardingScreen() {
           <View style={styles.stepContainer}>
             <View style={{ gap: 6 }}>
               <Txt variant="eyebrow" color={color.ink3}>LANGKAH 2 DARI 4</Txt>
-              <Txt variant="title" weight="700">Tentukan Target Harian</Txt>
+              <Txt variant="display">Tentukan Target Harian</Txt>
               <Txt variant="callout" color={color.ink3}>
                 Batas wajar yang lo tetapkan untuk diri lo sendiri.
               </Txt>
@@ -312,7 +317,7 @@ export default function OnboardingScreen() {
           <View style={styles.stepContainer}>
             <View style={{ gap: 6 }}>
               <Txt variant="eyebrow" color={color.ink3}>LANGKAH 3 DARI 4</Txt>
-              <Txt variant="title" weight="700">Baseline & Biaya Rokok</Txt>
+              <Txt variant="display">Baseline & Biaya Rokok</Txt>
               <Txt variant="callout" color={color.ink3}>
                 Untuk menghitung riil uang yang lo selamatkan.
               </Txt>
@@ -393,7 +398,7 @@ export default function OnboardingScreen() {
           <View style={styles.stepContainer}>
             <View style={{ gap: 6 }}>
               <Txt variant="eyebrow" color={color.ink3}>LANGKAH TERAKHIR</Txt>
-              <Txt variant="title" weight="700">Gaya Akuntabilitas</Txt>
+              <Txt variant="display">Gaya Akuntabilitas</Txt>
               <Txt variant="callout" color={color.ink3}>
                 Pilih seberapa tegas KuroStop mengevaluasi pilihan lo.
               </Txt>
@@ -412,15 +417,20 @@ export default function OnboardingScreen() {
                     key={mode}
                     scaleTo={0.98}
                     onPress={() => setIntensity(mode)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isSelected }}
                     style={[styles.intensityCard, isSelected && styles.intensityCardSelected]}
                   >
-                    <View style={{ gap: 4 }}>
-                      <Txt variant="headline" weight="700" color={isSelected ? color.ink : color.ink2}>
+                    <View style={{ flex: 1, gap: 4 }}>
+                      <Txt variant="headline" weight="600" color={isSelected ? color.ink : color.ink2}>
                         {labels[mode].title}
                       </Txt>
                       <Txt variant="footnote" color={color.ink3}>
                         &ldquo;{SAMPLE_BY_INTENSITY[mode]}&rdquo;
                       </Txt>
+                    </View>
+                    <View style={[styles.check, isSelected && styles.checkOn]}>
+                      {isSelected ? <Icon name="checkmark" size={13} color={color.white} /> : null}
                     </View>
                   </PressableScale>
                 );
@@ -454,7 +464,7 @@ export default function OnboardingScreen() {
             </View>
           </View>
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -464,7 +474,7 @@ function HabitOptionCard({
 }: {
   title: string;
   subtitle: string;
-  icon: any;
+  icon: IconName;
   selected: boolean;
   onPress: () => void;
 }) {
@@ -472,14 +482,19 @@ function HabitOptionCard({
     <PressableScale
       scaleTo={0.98}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
       style={[styles.habitCard, selected && styles.habitCardSelected]}
     >
       <View style={[styles.habitIconWrapper, selected && styles.habitIconWrapperSelected]}>
-        <IconButton icon={icon} label={title} tone="clear" size={28} iconColor={selected ? color.white : color.ink} />
+        <Icon name={icon} size={20} color={selected ? color.white : color.ink} />
       </View>
       <View style={{ flex: 1, gap: 2 }}>
-        <Txt variant="headline" weight="700" color={color.ink}>{title}</Txt>
+        <Txt variant="headline" weight="600" color={color.ink}>{title}</Txt>
         <Txt variant="footnote" color={color.ink3}>{subtitle}</Txt>
+      </View>
+      <View style={[styles.check, selected && styles.checkOn]}>
+        {selected ? <Icon name="checkmark" size={13} color={color.white} /> : null}
       </View>
     </PressableScale>
   );
@@ -489,7 +504,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: color.paper,
-    paddingHorizontal: space.md,
+    paddingHorizontal: gutter,
   },
   topBar: {
     flexDirection: 'row',
@@ -517,10 +532,6 @@ const styles = StyleSheet.create({
     width: 6,
     backgroundColor: color.fillStrong,
   },
-  content: {
-    flex: 1,
-    marginTop: 12,
-  },
   stepContainer: {
     flex: 1,
   },
@@ -538,14 +549,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
     backgroundColor: color.sheet,
-    padding: 16,
+    padding: 14,
     borderRadius: radius.lg,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: color.hair,
   },
   habitCardSelected: {
+    borderWidth: 1.5,
     borderColor: color.ink,
-    backgroundColor: '#FAFAF8',
   },
   habitIconWrapper: {
     width: 44,
@@ -564,14 +575,30 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   intensityCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     backgroundColor: color.sheet,
     padding: 14,
     borderRadius: radius.md,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: color.hair,
   },
   intensityCardSelected: {
+    borderWidth: 1.5,
     borderColor: color.ink,
-    backgroundColor: '#FAFAF8',
+  },
+  check: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1,
+    borderColor: color.fillStrong,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkOn: {
+    backgroundColor: color.ink,
+    borderColor: color.ink,
   },
 });
