@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { logMilestone } from '@/lib/milestone';
 import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +18,17 @@ export default function OnboardingScreen() {
   const { actions } = useApp();
 
   const [step, setStep] = useState<number>(0);
+
+  useEffect(() => {
+    logMilestone('FIRST_SCREEN_RENDERED', { screen: 'onboarding', returningUser: false });
+    logMilestone('ONBOARDING_SCREEN_MOUNTED');
+  }, []);
+
+  const handleQuickStart = async () => {
+    haptic.success();
+    await actions.completeOnboarding(DEFAULT_SETTINGS, false);
+    router.replace('/');
+  };
 
   // Form state initialized from DEFAULT_SETTINGS
   const [habits, setHabits] = useState<Record<Habit, boolean>>({
@@ -66,7 +78,7 @@ export default function OnboardingScreen() {
   const hasAnyHabit = habits.smoke || habits.pmo || habits.sleep;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 20 }]}>
+    <View testID="onboarding-screen" style={[styles.container, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 20 }]}>
       {/* Top Navigation & Progress Dots */}
       <View style={styles.topBar}>
         {step > 0 ? (
@@ -104,7 +116,7 @@ export default function OnboardingScreen() {
               <View style={styles.appIconPlaceholder}>
                 <Txt variant="hero" color={color.white}>K</Txt>
               </View>
-              <Txt variant="display" center weight="800">KuroStop</Txt>
+              <Txt variant="display" center weight="800" testID="welcome-title">KuroStop</Txt>
               <Txt variant="headline" color={color.ink2} center weight="600">
                 Every Choice Leaves a Mark.
               </Txt>
@@ -113,13 +125,20 @@ export default function OnboardingScreen() {
               </Txt>
             </View>
 
-            <View style={{ marginTop: 'auto', gap: 12 }}>
+            <View style={{ marginTop: 'auto', gap: 10 }}>
               <Txt variant="footnote" color={color.ink4} center>
                 Tanpa registrasi. Tanpa akun. Data lo milik lo sendiri.
               </Txt>
               <Button
                 label="Mulai Sekarang"
+                testID="onboarding-start-btn"
                 onPress={goNext}
+              />
+              <Button
+                label="Gunakan Pengaturan Standar"
+                variant="secondary"
+                testID="onboarding-quick-setup-btn"
+                onPress={handleQuickStart}
               />
             </View>
           </View>
@@ -250,6 +269,7 @@ export default function OnboardingScreen() {
             <View style={{ marginTop: 'auto' }}>
               <Button
                 label="Lanjut"
+                testID="onboarding-next-btn"
                 onPress={goNext}
               />
             </View>
@@ -330,6 +350,7 @@ export default function OnboardingScreen() {
             <View style={{ marginTop: 'auto' }}>
               <Button
                 label="Lanjut"
+                testID="onboarding-next-btn"
                 onPress={goNext}
               />
             </View>
@@ -395,6 +416,7 @@ export default function OnboardingScreen() {
             <View style={{ marginTop: 'auto' }}>
               <Button
                 label="Masuk ke KuroStop"
+                testID="onboarding-finish-btn"
                 onPress={handleFinish}
               />
             </View>

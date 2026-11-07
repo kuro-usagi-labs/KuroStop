@@ -10,7 +10,12 @@ import { AppLockProvider } from '@/components/security/AppLockProvider';
 import { Button, Txt } from '@/components/ui/primitives';
 import { ToastHost, ToastProvider } from '@/components/ui/toast';
 import { AppProvider, useApp } from '@/data/store';
+import { logMilestone } from '@/lib/milestone';
 import { color } from '@/theme/tokens';
+
+// Keep the splash screen visible while fonts and database resources load.
+// Must be called at module level before any component mounts.
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
   return (
@@ -30,28 +35,37 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    console.log('[KuroStop] ROOT_LAYOUT_MOUNTED');
-    SplashScreen.preventAutoHideAsync().catch(() => {});
+    logMilestone('ROOT_LAYOUT_MOUNTED');
   }, []);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
-      console.log('[KuroStop] FONTS_READY (loaded:', fontsLoaded, 'error:', !!fontError, ')');
+      logMilestone('FONTS_READY', { fontsLoaded: !!fontsLoaded, fontError: !!fontError });
       SplashScreen.hideAsync().catch(() => {});
     }
   }, [fontsLoaded, fontError]);
 
+  // If fonts are not ready yet, render a porcelain-paper container instead of null.
+  // This guarantees the display is NEVER left with a blank or black frame.
   if (!fontsLoaded && !fontError) {
-    return null;
+    return (
+      <View
+        testID="root-loading"
+       
+        style={{ flex: 1, backgroundColor: color.paper }}
+      />
+    );
   }
 
   return (
     <AppProvider>
       <ToastProvider>
         <AppLockProvider>
-          <StatusBar style="dark" />
-          <RootTabs />
-          <ToastHost />
+          <View style={{ flex: 1, backgroundColor: color.paper }} testID="root-app-container">
+            <StatusBar style="dark" />
+            <RootTabs />
+            <ToastHost />
+          </View>
         </AppLockProvider>
       </ToastProvider>
     </AppProvider>

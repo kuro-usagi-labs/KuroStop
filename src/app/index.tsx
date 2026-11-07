@@ -29,6 +29,7 @@ import { haptic } from '@/lib/haptics';
 import {
   color, radius, space, zones, ZONE_ORDER, type Zone,
 } from '@/theme/tokens';
+import { logMilestone } from '@/lib/milestone';
 
 /* ════════════════════════════════════════════════════════════════ */
 
@@ -37,7 +38,10 @@ export default function TodayDashboard() {
 
   if (state.status === "initializing") {
     return (
-      <View style={{ flex: 1, backgroundColor: color.paper, justifyContent: "center", alignItems: "center" }}>
+      <View
+        testID="db-initializing"
+        style={{ flex: 1, backgroundColor: color.paper, justifyContent: "center", alignItems: "center" }}
+      >
         <Txt variant="headline" color={color.ink2}>KuroStop</Txt>
         <Txt variant="caption" color={color.ink4} style={{ marginTop: 6 }}>Memuat data lokal...</Txt>
       </View>
@@ -64,6 +68,11 @@ export default function TodayDashboard() {
 function TodayDashboardContent() {
   const { state, actions } = useApp();
   const { now, today, index, stat, zone, simulated, settings } = useToday();
+
+  useEffect(() => {
+    logMilestone('FIRST_SCREEN_RENDERED', { screen: 'today-dashboard', returningUser: true });
+    logMilestone('TODAY_DASHBOARD_MOUNTED');
+  }, []);
 
   // ── Accountability message ──
   const msg = settings.messagesOn
@@ -156,6 +165,7 @@ function TodayDashboardContent() {
 
   return (
     <Screen
+      testID="today-dashboard"
       title="Hari Ini"
       eyebrow={keyLabel(today, 'long')}
       right={
@@ -169,7 +179,8 @@ function TodayDashboardContent() {
     >
       {/* ─── 1. Hero DaySheet ─── */}
       <Section index={0}>
-        <DaySheet
+        <View testID="daysheet-card">
+          <DaySheet
           zone={zone}
           eyebrow={`ZONA · ${zones[zone].label.toUpperCase()}`}
           headline={msg.headline}
@@ -178,6 +189,7 @@ function TodayDashboardContent() {
           footer={footerContent}
           simulated={simulated}
         />
+        </View>
       </Section>
 
       {/* ─── 2. Zone Simulator Strip (Isolate to Demo Mode) ─── */}
@@ -241,6 +253,7 @@ function TodayDashboardContent() {
         <View style={styles.quickRow}>
           {settings.habits.smoke ? (
             <Button
+              testID="quick-log-smoke"
               label="Catat Rokok"
               icon="flame-outline"
               variant="secondary"

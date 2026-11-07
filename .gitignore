@@ -49,3 +49,6 @@ build/
 # generated native folders
 /ios
 /android
+build_sim/
+verified_sim_artifacts/
+run_jobs.json

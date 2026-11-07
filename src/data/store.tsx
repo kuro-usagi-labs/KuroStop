@@ -20,6 +20,7 @@ import {
 import { generateDemo } from './demo';
 import { DEFAULT_SETTINGS, type Entry, type Settings } from './types';
 import { uid } from '../lib/format';
+import { logMilestone } from '../lib/milestone';
 import type { Zone } from '../theme/tokens';
 
 type DistributiveOmit<T, K extends keyof never> = T extends unknown ? Omit<T, K> : never;
@@ -176,14 +177,14 @@ export function AppProvider({
       isInitializingRef.current = true;
 
       try {
-        console.log('[KuroStop] APP_START: Opening SQLite database...');
+        logMilestone('APP_START');
         const db = database ?? (await getAppDatabase());
-        console.log('[KuroStop] SQLITE_OPENED');
+        logMilestone('SQLITE_OPENED');
         if (!active) return;
         dbRef.current = db;
 
         await runMigrations(db);
-        console.log('[KuroStop] MIGRATIONS_COMPLETE');
+        logMilestone('MIGRATIONS_COMPLETE');
 
         const repos: Repositories = {
           smoking: new SmokingRepository(db),
@@ -198,7 +199,7 @@ export function AppProvider({
 
         // Load settings
         const persistedSettings = await repos.settings.getSettings();
-        console.log('[KuroStop] SETTINGS_LOADED');
+        logMilestone('SETTINGS_LOADED');
 
         // Load all entries without query truncation limits
         const [smokes, pmos, sleeps, purchases, urges, checkins] = await Promise.all([
@@ -299,6 +300,7 @@ export function AppProvider({
           throw new Error('Database lokal belum siap untuk menyimpan setup onboarding.');
         }
         await repos.settings.updateSettings({ ...newSettings, onboarded: true });
+        logMilestone('ONBOARDING_COMPLETED');
 
         let demoEntries: Entry[] = [];
         if (withDemo) {

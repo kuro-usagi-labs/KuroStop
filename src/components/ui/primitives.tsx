@@ -92,7 +92,7 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent' | '
 
 export function Button({
   label, onPress, variant = 'primary', size = 'lg', icon, accent, disabled, haptic: h = 'light', style, accessibilityLabel,
-  accessibilityHint,
+  accessibilityHint, testID,
 }: {
   label: string;
   onPress?: () => void;
@@ -105,6 +105,7 @@ export function Button({
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
   accessibilityHint?: string;
+  testID?: string;
 }) {
   const palette: Record<ButtonVariant, { bg: string; fg: string; border?: string }> = {
     primary: { bg: color.ink, fg: color.white },
@@ -118,6 +119,7 @@ export function Button({
   const h_ = size === 'lg' ? 56 : size === 'md' ? 48 : 36;
   return (
     <PressableScale
+      testID={testID}
       onPress={onPress}
       disabled={disabled}
       haptic={h}
@@ -144,7 +146,7 @@ export function Button({
 }
 
 export function IconButton({
-  icon, onPress, label, tone = 'fill', size = HIT, iconColor,
+  icon, onPress, label, tone = 'fill', size = HIT, iconColor, testID,
 }: {
   icon: IconName;
   onPress?: () => void;
@@ -152,11 +154,13 @@ export function IconButton({
   tone?: 'fill' | 'ink' | 'clear' | 'sheet';
   size?: number;
   iconColor?: string;
+  testID?: string;
 }) {
   const bg = { fill: color.fill, ink: color.ink, clear: 'transparent', sheet: color.sheet }[tone];
   const fg = iconColor ?? (tone === 'ink' ? color.white : color.ink);
   return (
     <PressableScale
+      testID={testID}
       onPress={onPress}
       accessibilityLabel={label}
       hitSlop={size < HIT ? (HIT - size) / 2 : 0}

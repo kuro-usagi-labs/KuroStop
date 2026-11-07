@@ -7,10 +7,12 @@
     "icon": "./assets/images/icon.png",
     "scheme": "kurostop",
     "userInterfaceStyle": "light",
+    "backgroundColor": "#F2F3F0",
+    "primaryColor": "#1C1C1E",
     "ios": {
       "bundleIdentifier": "com.kurostop.personal",
       "supportsTablet": false,
-      "buildNumber": "2",
+      "buildNumber": "3",
       "infoPlist": {
         "NSFaceIDUsageDescription": "KuroStop memerlukan izin Face ID untuk mengamankan catatan disiplin pribadi Anda.",
         "UIRequiresFullScreen": true,
@@ -22,6 +24,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "./plugins/withReleaseLogging",
       "expo-router",
       "expo-font",
       [
