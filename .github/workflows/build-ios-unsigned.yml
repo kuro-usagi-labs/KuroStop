@@ -103,9 +103,8 @@ jobs:
           fi
           echo "Selected Simulator UDID: $SIM_UDID"
 
-          # Prepare Python dependencies & script permissions
-          python3 -m pip install --upgrade pip Pillow || pip3 install Pillow
-          chmod +x scripts/run_simulator_test.sh scripts/verify_screenshot_pixels.py scripts/verify_accessibility.swift
+          # Ensure native test scripts are executable
+          chmod +x scripts/run_simulator_test.sh scripts/verify_screenshot_pixels.swift scripts/verify_accessibility.swift
 
           # Execute End-to-End Automated UI Smoke Test Suite
           ./scripts/run_simulator_test.sh "$SIM_UDID" "$SIM_APP"

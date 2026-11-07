@@ -70,7 +70,7 @@ xcrun simctl io "$SIM_UDID" screenshot "$SS1"
 
 # Verify Screenshot 1 Pixels (must NOT be black, must be Lembar light paper)
 echo "Validating Screenshot 1 Pixels..."
-python3 scripts/verify_screenshot_pixels.py "$SS1" 60.0 20.0
+swift scripts/verify_screenshot_pixels.swift "$SS1" 60.0 20.0
 
 # Verify UI Accessibility Hierarchy for Onboarding
 echo "Inspecting Accessibility Hierarchy for Onboarding Screen..."
@@ -100,7 +100,7 @@ echo "Capturing Dashboard Transition Screenshot: $SS2"
 xcrun simctl io "$SIM_UDID" screenshot "$SS2"
 
 echo "Validating Screenshot 2 Pixels..."
-python3 scripts/verify_screenshot_pixels.py "$SS2" 60.0 20.0
+swift scripts/verify_screenshot_pixels.swift "$SS2" 60.0 20.0
 
 echo "Inspecting Accessibility Hierarchy for Today Dashboard..."
 swift scripts/verify_accessibility.swift \
@@ -126,7 +126,7 @@ echo "Capturing Relaunch Returning User Screenshot: $SS3"
 xcrun simctl io "$SIM_UDID" screenshot "$SS3"
 
 echo "Validating Screenshot 3 Pixels..."
-python3 scripts/verify_screenshot_pixels.py "$SS3" 60.0 20.0
+swift scripts/verify_screenshot_pixels.swift "$SS3" 60.0 20.0
 
 echo "Inspecting Accessibility Hierarchy for Returning User..."
 swift scripts/verify_accessibility.swift \
