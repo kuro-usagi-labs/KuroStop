@@ -52,3 +52,10 @@ build/
 build_sim/
 verified_sim_artifacts/
 run_jobs.json
+
+# CI Diagnostic and local audit files
+*_log.txt
+*_artifacts/
+download_*.py
+print_*.py
+scripts/check_*.py

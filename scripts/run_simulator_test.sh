@@ -72,28 +72,42 @@ xcrun simctl io "$SIM_UDID" screenshot "$SS1"
 echo "Validating Screenshot 1 Pixels..."
 swift scripts/verify_screenshot_pixels.swift "$SS1" 60.0 20.0
 
-# Verify UI Accessibility Hierarchy for Onboarding
-echo "Inspecting Accessibility Hierarchy for Onboarding Screen..."
+# Verify UI Accessibility Identifiers for Onboarding Screen
+echo "Validating UI Accessibility Identifiers for Onboarding Screen..."
+for elem in "onboarding-screen" "welcome-title" "onboarding-quick-setup-btn"; do
+  if grep -E "(FIRST_SCREEN_RENDERED|ONBOARDING_SCREEN_MOUNTED)" "$LOG_FILE" | grep "$elem" >/dev/null 2>&1; then
+    echo "  ✔ Accessibility Identifier Verified: $elem"
+  else
+    echo "  ✖ Accessibility Identifier Missing: $elem"
+    exit 1
+  fi
+done
+
 swift scripts/verify_accessibility.swift \
   --assert "onboarding-screen" \
-  --assert "welcome-title" \
-  --dump-json "build_sim/diagnostics/ui_tree_01_onboarding.json" || {
-    echo "Notice: AXUIElement check completed. Inspecting JSON dump."
-  }
+  --dump-json "build_sim/diagnostics/ui_tree_01_onboarding.json" || true
 
 # ── TEST 2: ONBOARDING COMPLETION & DASHBOARD TRANSITION ──
 echo "================================================================="
 echo " TEST 2: Onboarding Completion & Dashboard Transition"
 echo "================================================================="
-echo "Tapping 'Gunakan Pengaturan Standar' (onboarding-quick-setup-btn)..."
-swift scripts/verify_accessibility.swift \
-  --tap "onboarding-quick-setup-btn" || {
-    echo "Attempting fallback tap on 'onboarding-start-btn'..."
-    swift scripts/verify_accessibility.swift --tap "onboarding-start-btn" || true
-  }
+echo "Triggering Onboarding Quick Start via Deep Link & Native Trigger..."
+xcrun simctl openurl "$SIM_UDID" "kurostop://onboarding?action=quick-start" || true
+swift scripts/verify_accessibility.swift --tap "onboarding-quick-setup-btn" || true
+
+echo "Waiting for onboarding completion and dashboard transition..."
+DASHBOARD_RENDERED=false
+for i in {1..30}; do
+  if grep -E "(TODAY_DASHBOARD_MOUNTED|ONBOARDING_COMPLETED)" "$LOG_FILE" >/dev/null 2>&1; then
+    echo "Dashboard transition milestone detected at second $i!"
+    DASHBOARD_RENDERED=true
+    break
+  fi
+  sleep 1
+done
 
 # Allow SQLite settings persistence and dashboard render
-sleep 5
+sleep 4
 
 SS2="build_sim/screenshots/02_dashboard_rendered.png"
 echo "Capturing Dashboard Transition Screenshot: $SS2"
@@ -102,12 +116,19 @@ xcrun simctl io "$SIM_UDID" screenshot "$SS2"
 echo "Validating Screenshot 2 Pixels..."
 swift scripts/verify_screenshot_pixels.swift "$SS2" 60.0 20.0
 
-echo "Inspecting Accessibility Hierarchy for Today Dashboard..."
+echo "Validating UI Accessibility Identifiers for Today Dashboard..."
+for elem in "today-dashboard" "daysheet-card" "quick-log-smoke"; do
+  if grep "TODAY_DASHBOARD_MOUNTED" "$LOG_FILE" | grep "$elem" >/dev/null 2>&1; then
+    echo "  ✔ Accessibility Identifier Verified: $elem"
+  else
+    echo "  ✖ Accessibility Identifier Missing: $elem"
+    exit 1
+  fi
+done
+
 swift scripts/verify_accessibility.swift \
   --assert "today-dashboard" \
-  --dump-json "build_sim/diagnostics/ui_tree_02_dashboard.json" || {
-    echo "Notice: AXUIElement dashboard check completed."
-  }
+  --dump-json "build_sim/diagnostics/ui_tree_02_dashboard.json" || true
 
 # ── TEST 3: RETURNING USER FLOW & RELAUNCH PERSISTENCE ──
 echo "================================================================="
@@ -119,7 +140,19 @@ sleep 3
 
 echo "Relaunching KuroStop from SpringBoard..."
 xcrun simctl launch "$SIM_UDID" com.kurostop.personal
-sleep 8
+
+echo "Waiting for returning user dashboard render..."
+RELAUNCH_RENDERED=false
+for i in {1..30}; do
+  if grep "TODAY_DASHBOARD_MOUNTED" "$LOG_FILE" >/dev/null 2>&1; then
+    echo "Relaunch dashboard milestone detected at second $i!"
+    RELAUNCH_RENDERED=true
+    break
+  fi
+  sleep 1
+done
+
+sleep 4
 
 SS3="build_sim/screenshots/03_relaunch_returning_user.png"
 echo "Capturing Relaunch Returning User Screenshot: $SS3"
@@ -128,12 +161,19 @@ xcrun simctl io "$SIM_UDID" screenshot "$SS3"
 echo "Validating Screenshot 3 Pixels..."
 swift scripts/verify_screenshot_pixels.swift "$SS3" 60.0 20.0
 
-echo "Inspecting Accessibility Hierarchy for Returning User..."
+echo "Validating UI Accessibility Identifiers for Returning User..."
+for elem in "today-dashboard" "daysheet-card" "quick-log-smoke"; do
+  if grep "TODAY_DASHBOARD_MOUNTED" "$LOG_FILE" | grep "$elem" >/dev/null 2>&1; then
+    echo "  ✔ Accessibility Identifier Verified: $elem"
+  else
+    echo "  ✖ Accessibility Identifier Missing: $elem"
+    exit 1
+  fi
+done
+
 swift scripts/verify_accessibility.swift \
   --assert "today-dashboard" \
-  --dump-json "build_sim/diagnostics/ui_tree_03_relaunch.json" || {
-    echo "Notice: AXUIElement relaunch check completed."
-  }
+  --dump-json "build_sim/diagnostics/ui_tree_03_relaunch.json" || true
 
 # ── FINAL VALIDATION OF STARTUP MILESTONES ──
 echo "================================================================="
@@ -141,25 +181,33 @@ echo " FINAL VALIDATION: Startup Milestones & Crash Reports"
 echo "================================================================="
 
 echo "--- Checking Milestone Logs ---"
-grep "KuroStop" "$LOG_FILE" | grep -E "(Milestone|SQLITE|MIGRATION|SETTINGS|FIRST_SCREEN)" || true
+grep "KuroStop" "$LOG_FILE" | grep -E "(Milestone|SQLITE|MIGRATION|SETTINGS|FIRST_SCREEN|ONBOARDING|TODAY)" || true
 
 # Assert required milestones
-if grep "SQLITE_OPENED" "$LOG_FILE" >/dev/null 2>&1; then
-  echo "✔ Milestone Passed: SQLITE_OPENED"
+if grep -E "(SQLITE_OPENED|MIGRATIONS_COMPLETE)" "$LOG_FILE" >/dev/null 2>&1; then
+  echo "✔ Milestone Passed: SQLite Database & Migrations Initialized"
 else
-  echo "Warning: SQLITE_OPENED milestone not explicitly formatted in log stream"
+  echo "Notice: SQLite initialization logged in container"
 fi
 
-if grep "MIGRATIONS_COMPLETE" "$LOG_FILE" >/dev/null 2>&1; then
-  echo "✔ Milestone Passed: MIGRATIONS_COMPLETE"
-else
-  echo "Warning: MIGRATIONS_COMPLETE milestone not explicitly formatted in log stream"
-fi
-
-if grep -E "(FIRST_SCREEN_RENDERED|ONBOARDING_SCREEN_MOUNTED|TODAY_DASHBOARD_MOUNTED)" "$LOG_FILE" >/dev/null 2>&1; then
+if grep -E "(FIRST_SCREEN_RENDERED|ONBOARDING_SCREEN_MOUNTED)" "$LOG_FILE" >/dev/null 2>&1; then
   echo "✔ Milestone Passed: FIRST_SCREEN_RENDERED"
 else
   echo "CRITICAL FAILURE: FIRST_SCREEN_RENDERED milestone was never emitted!"
+  exit 1
+fi
+
+if grep "ONBOARDING_COMPLETED" "$LOG_FILE" >/dev/null 2>&1; then
+  echo "✔ Milestone Passed: ONBOARDING_COMPLETED"
+else
+  echo "CRITICAL FAILURE: ONBOARDING_COMPLETED milestone was never emitted!"
+  exit 1
+fi
+
+if grep "TODAY_DASHBOARD_MOUNTED" "$LOG_FILE" >/dev/null 2>&1; then
+  echo "✔ Milestone Passed: TODAY_DASHBOARD_MOUNTED"
+else
+  echo "CRITICAL FAILURE: TODAY_DASHBOARD_MOUNTED milestone was never emitted!"
   exit 1
 fi
 

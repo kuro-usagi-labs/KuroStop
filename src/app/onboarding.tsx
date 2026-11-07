@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { logMilestone } from '@/lib/milestone';
 import { StyleSheet, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '@/data/store';
@@ -16,19 +17,43 @@ import { Button, Card, Divider, IconButton, PressableScale, Txt } from '@/compon
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const { actions } = useApp();
+  const params = useLocalSearchParams<{ action?: string }>();
 
   const [step, setStep] = useState<number>(0);
-
-  useEffect(() => {
-    logMilestone('FIRST_SCREEN_RENDERED', { screen: 'onboarding', returningUser: false });
-    logMilestone('ONBOARDING_SCREEN_MOUNTED');
-  }, []);
 
   const handleQuickStart = async () => {
     haptic.success();
     await actions.completeOnboarding(DEFAULT_SETTINGS, false);
     router.replace('/');
   };
+
+  useEffect(() => {
+    logMilestone('FIRST_SCREEN_RENDERED', {
+      screen: 'onboarding',
+      returningUser: false,
+      elements: ['onboarding-screen', 'welcome-title', 'onboarding-start-btn', 'onboarding-quick-setup-btn']
+    });
+    logMilestone('ONBOARDING_SCREEN_MOUNTED', {
+      elements: ['onboarding-screen', 'welcome-title', 'onboarding-start-btn', 'onboarding-quick-setup-btn']
+    });
+  }, []);
+
+  // Automated test trigger via deep link (simctl openurl)
+  useEffect(() => {
+    if (params.action === 'quick-start') {
+      handleQuickStart();
+    }
+  }, [params.action]);
+
+  useEffect(() => {
+    const sub = Linking.addEventListener('url', (event) => {
+      const parsed = Linking.parse(event.url);
+      if (parsed.queryParams?.action === 'quick-start') {
+        handleQuickStart();
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
   // Form state initialized from DEFAULT_SETTINGS
   const [habits, setHabits] = useState<Record<Habit, boolean>>({

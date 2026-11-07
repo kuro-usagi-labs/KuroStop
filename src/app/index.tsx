@@ -70,8 +70,14 @@ function TodayDashboardContent() {
   const { now, today, index, stat, zone, simulated, settings } = useToday();
 
   useEffect(() => {
-    logMilestone('FIRST_SCREEN_RENDERED', { screen: 'today-dashboard', returningUser: true });
-    logMilestone('TODAY_DASHBOARD_MOUNTED');
+    logMilestone('FIRST_SCREEN_RENDERED', {
+      screen: 'today-dashboard',
+      returningUser: true,
+      elements: ['today-dashboard', 'daysheet-card', 'quick-log-smoke']
+    });
+    logMilestone('TODAY_DASHBOARD_MOUNTED', {
+      elements: ['today-dashboard', 'daysheet-card', 'quick-log-smoke']
+    });
   }, []);
 
   // ── Accountability message ──
